@@ -1,0 +1,51 @@
+name: blog
+
+dependencies:
+- base >= 4.7 && < 5
+- hakyll
+- tasty
+- tasty-hunit
+- blaze-html
+- containers
+- filepath
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+default-extensions:
+- OverloadedStrings
+- DerivingStrategies
+- DeriveFunctor
+
+library:
+    source-dirs: src
+
+executables:
+    blog-exe:
+        main:                Main.hs
+        source-dirs:         app
+        ghc-options:
+        - -threaded
+        - -rtsopts
+        - -with-rtsopts=-N
+        dependencies:
+        - blog
+
+tests:
+    blog-test:
+        main:                Spec.hs
+        source-dirs:         test
+        ghc-options:
+        - -threaded
+        - -rtsopts
+        - -with-rtsopts=-N
+        dependencies:
+        - blog
