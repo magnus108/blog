@@ -3,6 +3,7 @@ module Blog.Utils.Trie
     , empty
     , trie
     , insert
+    , unTrie
     )
 where
 
@@ -22,6 +23,11 @@ data Trie a = Trie (M.Map a (Trie a))
 
 instance (Ord a) => Semigroup (Trie a) where
     (Trie m1) <> (Trie m2) = Trie (M.unionWith (<>) m1 m2)
+
+
+unTrie :: Trie a -> M.Map a (Trie a)
+unTrie (Trie m) =  m
+
 
 empty :: Trie a
 empty = Trie M.empty

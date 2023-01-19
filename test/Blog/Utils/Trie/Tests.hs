@@ -9,13 +9,15 @@ import           System.FilePath                ( splitPath )
 
 
 --------------------------------------------------------------------------------
+import           TestSuite.Util
+
 import Blog.Utils.Trie
 
 --------------------------------------------------------------------------------
 
-
 tests :: TestTree
-tests = testGroup "Unit tests"
-    [  testCase "level1" $ assertEqual "toStructure" empty (insert (insert empty ["hey","plate"]) ["hey","mate","said"])
-    --,  testCase, "level1" $ assertEqual "toStructure" empty (trie project)
+tests = testGroup "Blog.Utils.Trie.Tests" $ concat
+    [  fromAssertions "insert"
+        [  insert (insert empty ["A","C","D"]) ["A","B"] @=? insert (insert empty ["A","B"]) ["A","C","D"]
+        ]
     ]

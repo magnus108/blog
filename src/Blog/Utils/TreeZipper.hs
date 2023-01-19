@@ -4,17 +4,20 @@ module Blog.Utils.TreeZipper
     , fromRoseTree
     , toRoseTree
     , datum
-    , children
     , down
     , up
+    , firstChild
     , lefts
     , rights
+    , children
     )
 where
 
 
+--------------------------------------------------------------------------------
 import qualified Blog.Utils.RoseTree as RT
 
+--------------------------------------------------------------------------------
 
 data Context a = Context [RT.RoseTree a] a [RT.RoseTree a]
     deriving stock (Show, Eq, Ord)
@@ -52,9 +55,11 @@ up (TreeZipper item ((Context ls x rs) : bs)) =
 
 
 rights' :: TreeZipper a -> [RT.RoseTree a]
+rights' (TreeZipper _    []                       ) = []
 rights' (TreeZipper item ((Context ls x rs) : bs)) = rs
 
 lefts' :: TreeZipper a -> [RT.RoseTree a]
+lefts' (TreeZipper _    []                       ) = []
 lefts' (TreeZipper item ((Context ls x rs) : bs)) = reverse ls
 
 
