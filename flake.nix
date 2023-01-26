@@ -16,6 +16,7 @@
                             stack = "2.9.1";
                             hlint = "latest";
                             haskell-language-server = "latest";
+                            ormolu = "latest";
                         };
                     };
                 })

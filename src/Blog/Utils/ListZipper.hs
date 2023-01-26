@@ -1,8 +1,11 @@
 module Blog.Utils.ListZipper
     ( ListZipper
     , focus
+    , listZipper
     , setFocus
+    , mapFocus
     , fromList
+    , toList
     , backward
     , forward
     , lefts
@@ -15,11 +18,18 @@ where
 
 data ListZipper a = ListZipper [a] a [a]
     deriving stock (Eq,Show)
+    deriving Foldable
 
+
+listZipper :: [a] -> a -> [a] -> ListZipper a
+listZipper ls x rs = ListZipper (reverse ls) x rs
 
 
 setFocus :: a -> ListZipper a -> ListZipper a
 setFocus y (ListZipper ls _ rs) = ListZipper ls y rs
+
+mapFocus :: (a -> a) -> ListZipper a -> ListZipper a
+mapFocus f (ListZipper ls x rs) = ListZipper ls (f x) rs
 
 
 focus :: ListZipper a -> a
@@ -29,6 +39,10 @@ focus (ListZipper _ x _) = x
 fromList :: [a] -> Maybe (ListZipper a)
 fromList [] = Nothing
 fromList (x:xs) = Just $ ListZipper [] x xs
+
+
+toList :: ListZipper a -> [a]
+toList x = lefts x <> (focus x : rights x)
 
 
 backward :: ListZipper a -> Maybe (ListZipper a)

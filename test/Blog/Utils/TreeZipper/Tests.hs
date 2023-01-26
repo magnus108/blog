@@ -52,6 +52,10 @@ tests = testGroup "Blog.Utils.TreeZipper.Tests" $ concat
         [ ["chair/", "kitchen/", "lamp/"] @=? TZ.datum <$> TZ.children zipper
         , Just ["index.md"] @=? fmap TZ.datum <$> TZ.children <$> TZ.down "chair/" zipper
         ]
+
+    ,  fromAssertions "siblings"
+        [ Just ["chair/","kitchen/","lamp/"] @=? fmap TZ.datum <$> TZ.siblings <$> TZ.down "chair/" zipper
+        ]
     ]
         where zipper = TZ.fromRoseTree $ R.roseTree "projects/"
                                             [ R.roseTree "chair/"

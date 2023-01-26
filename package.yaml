@@ -8,6 +8,10 @@ dependencies:
 - blaze-html
 - containers
 - filepath
+- directory
+- free
+- mtl
+- blaze-markup
 
 ghc-options:
 - -Wall
@@ -24,6 +28,7 @@ default-extensions:
 - OverloadedStrings
 - DerivingStrategies
 - DeriveFunctor
+- DeriveFoldable
 
 library:
     source-dirs: src

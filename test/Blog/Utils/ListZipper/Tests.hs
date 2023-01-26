@@ -22,6 +22,10 @@ tests = testGroup "Blog.Utils.ListZipper.Tests" $ concat
         , Just 1 @=? LZ.focus <$> LZ.fromList [1,2,3]
         ]
 
+    ,  fromAssertions "toList"
+        [ Just [1,2,3] @=? LZ.toList <$> (LZ.fromList [1,2,3] >>= LZ.forward)
+        ]
+
     ,  fromAssertions "forward"
         [ Nothing @=? LZ.focus <$> (LZ.fromList [1,2,3] >>= LZ.forward >>= LZ.forward >>= LZ.forward)
         , Just 2 @=? LZ.focus <$> (LZ.fromList [1,2,3] >>= LZ.forward)

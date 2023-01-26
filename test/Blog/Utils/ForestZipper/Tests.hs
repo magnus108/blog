@@ -23,12 +23,26 @@ tests = testGroup "Blog.Utils.ForestZipper.Tests" $ concat
         [ Just "index.md" @=? FZ.datum <$> forestZipper
         ]
 
+    ,  fromAssertions "siblings"
+        [ Just ["index.md","cv/","posts/","projects/"] @=? fmap TZ.datum <$> (FZ.siblings <$> forestZipper)
+        , Just ["applicative/","index.md","tests/"] @=? fmap TZ.datum <$> (FZ.siblings <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/"))
+        , Just ["index.md"] @=? fmap TZ.datum <$> (FZ.siblings <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/" >>= FZ.down "index.md"))
+        ]
+
     ,  fromAssertions "down"
-        [ Just "applicative/" @=? FZ.datum <$> (forestZipper2 >>= FZ.down "applicative/")
+        [ Just "applicative/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/")
         ]
 
     ,  fromAssertions "up"
-        [ Just "posts/" @=? FZ.datum <$> (forestZipper2 >>= FZ.down "applicative/" >>= FZ.up)
+        [ Just "posts/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/" >>= FZ.up)
+        ]
+
+    ,  fromAssertions "forward"
+        [ Just "posts/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward)
+        ]
+
+    ,  fromAssertions "backward"
+        [ Just "cv/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.backward)
         ]
     ]
     where
@@ -60,23 +74,3 @@ tests = testGroup "Blog.Utils.ForestZipper.Tests" $ concat
                                     ]
                                 ]
                     ]
-
-        forestZipper2 = FZ.fromForest $ R.forest
-                    [ R.roseTree "posts/"
-                                [ R.roseTree "applicative/"
-                                    [ R.roseTree "index.md" []]
-                                , R.roseTree "index.md" []
-                                , R.roseTree "tests/"
-                                    [ R.roseTree "index.md" []]
-                                ]
-                    , R.roseTree "index.md" []
-                    , R.roseTree "cv/" [R.roseTree "index.md" []]
-                    , R.roseTree "posts/"
-                                [ R.roseTree "applicative/"
-                                    [ R.roseTree "index.md" []]
-                                , R.roseTree "index.md" []
-                                , R.roseTree "tests/"
-                                    [ R.roseTree "index.md" []]
-                                ]
-                    ]
-

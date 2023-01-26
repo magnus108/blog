@@ -10,6 +10,7 @@ module Blog.Utils.TreeZipper
     , lefts
     , rights
     , children
+    , siblings
     )
 where
 
@@ -105,3 +106,7 @@ children tz =
     in  case child of
             Nothing     -> []
             Just child' -> child' : (rights child')
+
+
+siblings :: Eq a => TreeZipper a -> [TreeZipper a]
+siblings tz = lefts tz ++ (tz : rights tz)
