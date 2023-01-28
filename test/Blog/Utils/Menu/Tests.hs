@@ -29,11 +29,11 @@ tests = testGroup "Blog.Utils.Menu.Tests" $ concat
     ]
         where
             project =
-                [ "cv/index"
+                [ "cv/index.md"
                 , "index.md"
-                , "posts/index"
-                , "posts/applicative/index"
-                , "posts/tests/index"
+                , "posts/index.md"
+                , "posts/applicative/index.md"
+                , "posts/tests/index.md"
                 , "projects/chair/index.md"
                 , "projects/table/index.md"
                 , "projects/table/legs/index.md"
@@ -41,8 +41,8 @@ tests = testGroup "Blog.Utils.Menu.Tests" $ concat
                 , "projects/kitchen/door/handle/index.md"
                 ]
             forestZipper = FZ.fromForest $ R.forest
-                    [ R.roseTree "index.md" []
-                    , R.roseTree "cv/" [R.roseTree "index.md" []]
+                    [ R.roseTree "cv/" [R.roseTree "index.md" []]
+                    , R.roseTree "index.md" []
                     , R.roseTree "posts/"
                                 [ R.roseTree "applicative/"
                                     [ R.roseTree "index.md" []]
@@ -58,8 +58,7 @@ tests = testGroup "Blog.Utils.Menu.Tests" $ concat
                                         [ R.roseTree "handle/"
                                             [ R.roseTree "index.md" []]
                                         ]
-                                    ]
-                                , R.roseTree "table/"
+                                    ] , R.roseTree "table/"
                                     [ R.roseTree "index.md" []
                                     , R.roseTree "legs/"
                                         [ R.roseTree "index.md" []]

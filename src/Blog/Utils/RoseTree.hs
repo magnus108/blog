@@ -55,4 +55,4 @@ children (RoseTree _ xs) = xs
 fromTrie :: T.Trie a -> Forest a
 fromTrie trie = Forest $ children trie
     where
-        children = fmap (\(k, v) -> RoseTree k (children v)) . M.toList . T.unTrie
+        children = fmap (\(k, v) -> RoseTree k (children v)) . M.toAscList . T.unTrie

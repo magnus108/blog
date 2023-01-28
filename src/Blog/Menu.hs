@@ -36,5 +36,7 @@ showMenu :: Menu -> H.Html
 showMenu m = do
   -- let fz = toForestZipper m
   -- let table = foldUp (\x -> _) [] fz
-  let table = [LZ.listZipper [] "a" []]
-  T.runTableHTML $ T.mkTable table
+  let tableData = [LZ.listZipper [] "a" []]
+  T.runTableHTML $ T.mkTable tableData
+--  T.runTableHTML $ forM_ tableData 
+ --                           (\rowData -> col $ forM_ rowData row)

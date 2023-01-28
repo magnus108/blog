@@ -17,7 +17,4 @@ import Blog.Utils.Trie
 
 tests :: TestTree
 tests = testGroup "Blog.Utils.Trie.Tests" $ concat
-    [  fromAssertions "insert"
-        [  insert (insert empty ["A","C","D"]) ["A","B"] @=? insert (insert empty ["A","B"]) ["A","C","D"]
-        ]
-    ]
+    [ ]

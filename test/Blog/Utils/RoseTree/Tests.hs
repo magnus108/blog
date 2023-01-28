@@ -24,10 +24,10 @@ tests = testGroup "Blog.Utils.RoseTree.Tests" $ concat
         where
             project = splitPath <$>
                 [ "index.md"
-                , "cv/index"
-                , "posts/index"
-                , "posts/applicative/index"
-                , "posts/tests/index"
+                , "cv/index.md"
+                , "posts/index.md"
+                , "posts/applicative/index.md"
+                , "posts/tests/index.md"
                 , "projects/chair/index.md"
                 , "projects/table/index.md"
                 , "projects/table/legs/index.md"
@@ -35,16 +35,16 @@ tests = testGroup "Blog.Utils.RoseTree.Tests" $ concat
                 , "projects/kitchen/door/handle/index.md"
                 ]
             forest = R.forest
-                        [ R.roseTree "cv/" [R.roseTree "index" []]
-                            , R.roseTree "index.md" []
-                            , R.roseTree "posts/"
+                        [ R.roseTree "cv/" [R.roseTree "index.md" []]
+                        , R.roseTree "index.md" []
+                        , R.roseTree "posts/"
                                     [ R.roseTree "applicative/"
-                                        [ R.roseTree "index" []]
-                                    , R.roseTree "index" []
+                                        [ R.roseTree "index.md" []]
+                                    , R.roseTree "index.md" []
                                     , R.roseTree "tests/"
-                                        [ R.roseTree "index" []]
+                                        [ R.roseTree "index.md" []]
                                     ]
-                            , R.roseTree "projects/"
+                        , R.roseTree "projects/"
                                     [ R.roseTree "chair/"
                                         [ R.roseTree "index.md" []]
                                     , R.roseTree "kitchen/"
@@ -61,4 +61,4 @@ tests = testGroup "Blog.Utils.RoseTree.Tests" $ concat
                                                 [ R.roseTree "index.md" []]
                                         ]
                                     ]
-                            ]
+                        ]
