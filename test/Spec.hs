@@ -12,6 +12,7 @@ import qualified Blog.Utils.ListZipper.Tests
 import qualified Blog.Utils.TreeZipper.Tests
 import qualified Blog.Utils.ForestZipper.Tests
 import qualified Blog.Utils.Table.Tests
+import qualified Blog.Utils.Menu.Tests
 
 
 main :: IO ()
@@ -22,4 +23,5 @@ main = defaultMain $ testGroup "Tests"
     , Blog.Utils.TreeZipper.Tests.tests
     , Blog.Utils.ForestZipper.Tests.tests
     , Blog.Utils.Table.Tests.tests
+    , Blog.Utils.Menu.Tests.tests
     ]

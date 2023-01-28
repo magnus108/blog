@@ -55,8 +55,3 @@ backward (ForestZipper lz) = ForestZipper <$> LZ.backward lz
 
 forward :: ForestZipper a -> Maybe (ForestZipper a)
 forward (ForestZipper lz) = ForestZipper <$> LZ.forward lz
-
-
-
---rights :: ForestZipper a -> [TZ.TreeZipper a]
---rights fz = TZ.siblings $ LZ.focus $ toListZipper fz
