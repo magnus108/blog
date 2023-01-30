@@ -8,7 +8,8 @@ module Blog.Menu
 where
 
 -------------------------------------------------------------------------------
-
+import Data.Maybe
+import Control.Monad
 import qualified Blog.Table as T
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
@@ -34,9 +35,11 @@ toForestZipper (Menu tz) = tz
 
 showMenu :: Menu -> H.Html
 showMenu m = do
-  -- let fz = toForestZipper m
-  -- let table = foldUp (\x -> _) [] fz
-  let tableData = [LZ.listZipper [] "a" []]
-  T.runTableHTML $ T.mkTable tableData
---  T.runTableHTML $ forM_ tableData 
- --                           (\rowData -> col $ forM_ rowData row)
+  let xs = FZ.ancestors $ toForestZipper m
+  let tableData = catMaybes $ fmap LZ.fromList xs
+  T.runTableHTML $ forM_ tableData
+                            (\rowData -> T.row $ do
+                                        -- bør ikke smide structur info væk
+                                        --
+                                        forM_ rowData T.col 
+                            )

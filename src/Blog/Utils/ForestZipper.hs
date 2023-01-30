@@ -2,11 +2,12 @@ module Blog.Utils.ForestZipper
     ( ForestZipper
     , datum
     , fromForest
-    , siblings
     , down
     , up
     , backward
     , forward
+    , siblings
+    , ancestors
     )
 where
 
@@ -36,6 +37,14 @@ siblings fz@(ForestZipper lz) = case parent of
     where
         parent = up fz
 
+ancestors :: Eq a => ForestZipper a -> [[a]]
+ancestors fz = fmap TZ.datum <$> ancestors' [] fz
+    where
+        ancestors' acc fz' = case parent of
+                              Nothing -> acc
+                              Just fz'' -> ancestors' (siblings fz' : acc) fz''
+                    where
+                        parent = up fz'
 
 fromForest :: RT.Forest a -> Maybe (ForestZipper a)
 fromForest xs = ForestZipper <$> LZ.fromList (TZ.fromRoseTree <$> RT.toList xs)

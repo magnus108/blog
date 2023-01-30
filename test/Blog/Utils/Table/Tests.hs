@@ -19,10 +19,18 @@ import Control.Monad.Writer
 
 exampleScript :: Table ()
 exampleScript = do
-    mkTable [ listZipper ["a0"] "b0" ["c0"]
-            , listZipper [] "a1" ["b1","c1"]
-            , listZipper ["a2","b2"] "c2" []
-            ]
+        row $ do 
+                col "a0"
+                col "b0"
+                col "c0"
+        row $ do 
+                col "a1"
+                col "b1"
+                col "c1"
+        row $ do 
+                col "a2"
+                col "b2"
+                col "c2"
 
 
 tests :: TestTree
