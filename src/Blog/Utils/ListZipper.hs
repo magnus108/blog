@@ -18,7 +18,9 @@ where
 
 data ListZipper a = ListZipper [a] a [a]
     deriving stock (Eq,Show)
+    deriving Functor
     deriving Foldable
+    deriving Traversable
 
 
 listZipper :: [a] -> a -> [a] -> ListZipper a

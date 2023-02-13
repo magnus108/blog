@@ -2,12 +2,17 @@ module Blog.Menu
   ( Menu,
     menu,
     showMenu,
+    showMenu',
     makeMenu,
     toForestZipper
   )
 where
 
 -------------------------------------------------------------------------------
+import Text.Blaze.Internal
+import Polysemy
+import Data.Function
+import Polysemy.State
 import Data.Maybe
 import Control.Monad
 import qualified Blog.Table as T
@@ -33,13 +38,16 @@ makeMenu = fmap menu . FZ.fromForest . R.fromTrie . Tr.trie . fmap splitPath
 toForestZipper :: Menu -> FZ.ForestZipper FilePath
 toForestZipper (Menu tz) = tz
 
-showMenu :: Menu -> H.Html
-showMenu m = do
+
+showMenu' :: (Member T.Table r) => Menu -> Sem r ()
+showMenu' m = do
   let xs = FZ.ancestors $ toForestZipper m
   let tableData = catMaybes $ fmap LZ.fromList xs
-  T.runTableHTML $ forM_ tableData
-                            (\rowData -> T.row $ do
-                                        -- bør ikke smide structur info væk
-                                        --
-                                        forM_ rowData T.col 
-                            )
+  T.table tableData
+
+
+showMenu :: Menu -> H.Html
+showMenu m = showMenu' m & T.toHtml
+                            & evalState @[String] []
+                            & evalState @[[String]] []
+                            & runM

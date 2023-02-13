@@ -12,6 +12,8 @@ dependencies:
 - free
 - mtl
 - blaze-markup
+- polysemy
+- extra
 
 ghc-options:
 - -Wall
@@ -29,6 +31,19 @@ default-extensions:
 - DerivingStrategies
 - DeriveFunctor
 - DeriveFoldable
+- DeriveTraversable
+
+- DataKinds
+- FlexibleContexts
+- GADTs
+- LambdaCase
+- PolyKinds
+- RankNTypes
+- ScopedTypeVariables
+- TemplateHaskell
+- TypeApplications
+- TypeOperators
+- TypeFamilies
 
 library:
     source-dirs: src

@@ -1,66 +1,86 @@
 module Blog.Table
     ( Table
-    , TableF
-    , col
+    , table
+    , toHtml
+    , toListList
+    , table
+    , tab
     , row
-    , runTableWriter
-    , runTableHTML
+    , col
     )
 where
 
+import Text.Blaze.Internal
+import Text.Blaze.Html.Renderer.String
+
+import Data.Tuple.Extra
+import Data.Function
+import Polysemy
+import Polysemy.Writer
+import Polysemy.Reader
+import Polysemy.State
+import Polysemy.Output
+
+import Control.Monad
 import qualified Blog.Utils.ListZipper as LZ
-
-import Control.Monad.Writer
-import Control.Monad.Free
-
-
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-
 import Text.Blaze.Internal
 
 
-
-data TableF next
-    = Row (Table ()) next
-    | Col String next
-    deriving stock (Functor)
-
-
-type Table a = Free TableF a
+data Table m a where
+    Col :: String -> Table m ()
+    Row :: m () -> Table m ()
+    Tab :: m () -> Table m ()
 
 
-row :: Table ()  -> Table ()
-row args = liftF (Row args ())
+makeSem ''Table
 
 
-col :: String  -> Table ()
-col args = liftF (Col args ())
+table :: (Member Table r) => [LZ.ListZipper String] -> Sem r ()
+table rows = tab $ forM_ rows $ \rowData -> do
+                    row $ do
+                        forM_ rowData $ \colData-> do
+                            col colData
 
 
-runTableWriter' :: TableF a -> Writer [[String]] a
-runTableWriter' cmd = case cmd of
-                    Row args next -> do
-                        tell [(concat (execWriter (runTableWriter args)))]
-                        pure next
-                    Col args next -> do
-                        tell [[args]]
-                        pure next
+toHtml :: (Member (Embed MarkupM) r, Member (State [String]) r, Member (State [[String]]) r) => Sem (Table ': r) a -> Sem r a
+toHtml = interpretH (\case
+        Col o -> do
+            modify @[String] (++ [o])
+            pureT ()
+        Row m -> do
+            mm <- runT m
+            z <- raise $ toHtml mm
+            row <- get @[String]
+            modify @[[String]] (++ [row])
+            put @[String] []
+            pureT ()
+        Tab m -> do
+            mm <- runT m
+            z <- raise $ toHtml mm
+            rows <- get @[[String]]
+            embed $ forM_ rows $ \row -> do
+                        H.ul $ do
+                            forM_ row $ \col -> do
+                                H.li $ H.toHtml col
+            pureT ()
+    )
 
-
-runTableHTML' :: TableF a -> MarkupM a
-runTableHTML' cmd = case cmd of
-                    Row args next -> do
-                        H.ul (runTableHTML args)
-                        pure next
-                    Col args next -> do
-                        H.li (H.toHtml args)
-                        pure next
-
-
-
-runTableWriter :: Table a -> Writer [[String]] a
-runTableWriter = foldFree runTableWriter'
-
-runTableHTML :: Table a -> MarkupM a
-runTableHTML = foldFree runTableHTML'
+toListList :: (Member (State [String]) r, Member (State [[String]]) r) => Sem (Table ': r) a -> Sem r a
+toListList = interpretH (\case
+        Col o -> do
+            modify @[String] (++ [o])
+            pureT ()
+        Row m -> do
+            mm <- runT m
+            z <- raise $ toListList mm
+            row <- get @[String]
+            modify @[[String]] (++ [row])
+            put @[String] []
+            pureT ()
+        Tab m -> do
+            mm <- runT m
+            z <- raise $ toListList mm
+            pureT ()
+    )
