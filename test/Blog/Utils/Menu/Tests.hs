@@ -3,6 +3,8 @@ module Blog.Utils.Menu.Tests
     ) where
 
 --------------------------------------------------------------------------------
+import Polysemy
+import Polysemy.State
 import Test.Tasty
 import Test.Tasty.HUnit
 
@@ -25,6 +27,29 @@ tests :: TestTree
 tests = testGroup "Blog.Utils.Menu.Tests" $ concat
     [  fromAssertions "makeMenu"
         [ forestZipper @=? (Menu.toForestZipper <$> (Menu.makeMenu project))
+        ]
+
+    ,  fromAssertions "showMenu"
+        [ Just [] @=? (
+                  run
+                . execState @[[String]] []
+                . evalState @[String] []
+                . toListList
+                . Menu.showMenu' <$> (Menu.makeMenu project))
+
+        , Just [["cv/","index.md","posts/","projects/"]] @=? (
+                  run
+                . execState @[[String]] []
+                . evalState @[String] []
+                . toListList
+                . Menu.showMenu' <$> (Menu.down "index.md" =<< (Menu.makeMenu project)))
+
+        , Just [["cv/","index.md","posts/","projects/"],["applicative/","index.md","tests/"]] @=? (
+                  run
+                . execState @[[String]] []
+                . evalState @[String] []
+                . toListList
+                . Menu.showMenu' <$> (Menu.down "index.md" =<< Menu.down "applicative/" =<< Menu.forward =<< Menu.forward =<< (Menu.makeMenu project)))
         ]
     ]
         where

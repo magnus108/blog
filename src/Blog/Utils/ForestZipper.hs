@@ -42,7 +42,7 @@ ancestors fz = fmap TZ.datum <$> ancestors' [] fz
     where
         ancestors' acc fz' = case parent of
                               Nothing -> acc
-                              Just fz'' -> ancestors' (siblings fz' : acc) fz''
+                              Just fz'' -> ancestors' (siblings fz'' : acc) fz''
                     where
                         parent = up fz'
 
