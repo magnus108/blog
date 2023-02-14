@@ -1,2 +1,4 @@
 .stack-work/
 blog.cabal
+_site/
+_cache/

@@ -9,7 +9,7 @@ import qualified Hakyll as H
 import Text.Blaze.Html.Renderer.Pretty
 
 content :: H.Pattern
-content = "**/index.md"
+content = "**.md"
 
 main :: IO ()
 main =
