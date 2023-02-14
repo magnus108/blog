@@ -10,8 +10,6 @@ module Blog.Menu
   )
 where
 
--------------------------------------------------------------------------------
-
 import qualified Blog.Table as T
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
@@ -23,8 +21,6 @@ import Polysemy
 import Polysemy.State
 import System.FilePath (splitPath)
 import qualified Text.Blaze.Html5 as H
-
--------------------------------------------------------------------------------
 
 data Menu = Menu (FZ.ForestZipper FilePath)
   deriving stock (Show)
