@@ -16,6 +16,7 @@ import qualified Blog.Table as T
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
 import qualified Blog.Utils.RoseTree as R
+import qualified Blog.Utils.TreeZipper as TZ
 import qualified Blog.Utils.Trie as Tr
 import Data.Function
 import Data.Maybe
@@ -52,12 +53,13 @@ showMenu' :: (Member T.Table r) => Menu -> Sem r ()
 showMenu' m = do
   let xs = FZ.ancestors $ toForestZipper m
   let tableData = mapMaybe LZ.fromList xs
-  T.table tableData
+
+  T.table (fmap (\x -> (TZ.datum x, TZ.datum x)) <$> tableData)
 
 showMenu :: Menu -> H.Html
 showMenu m =
   showMenu' m
     & T.toHtml
-    & evalState @[String] []
-    & evalState @[[String]] []
+    & evalState @[(String, String)] []
+    & evalState @[[(String, String)]] []
     & runM

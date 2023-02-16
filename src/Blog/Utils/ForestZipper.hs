@@ -33,8 +33,8 @@ siblings fz@(ForestZipper lz) = case parent of
   where
     parent = up fz
 
-ancestors :: Eq a => ForestZipper a -> [[a]]
-ancestors fz = fmap TZ.datum <$> ancestors' [] fz
+ancestors :: Eq a => ForestZipper a -> [[TZ.TreeZipper a]]
+ancestors fz = ancestors' [] fz
   where
     ancestors' acc fz' = case parent of
       Nothing -> siblings fz' : acc
