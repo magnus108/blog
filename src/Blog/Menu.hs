@@ -12,6 +12,7 @@ module Blog.Menu
   )
 where
 
+import qualified Blog.Link as Link
 import qualified Blog.Table as T
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
@@ -52,14 +53,13 @@ toForestZipper (Menu tz) = tz
 showMenu' :: (Member T.Table r) => Menu -> Sem r ()
 showMenu' m = do
   let xs = FZ.ancestors $ toForestZipper m
-  let tableData = mapMaybe LZ.fromList xs
-
-  T.table (fmap (\x -> (TZ.datum x, TZ.datum x)) <$> tableData)
+  let tableData = mapMaybe LZ.fromList xs :: [LZ.ListZipper (TZ.TreeZipper FilePath)]
+  T.table (fmap Link.linkFromTreeZipper <$> tableData)
 
 showMenu :: Menu -> H.Html
 showMenu m =
   showMenu' m
     & T.toHtml
-    & evalState @[(String, String)] []
-    & evalState @[[(String, String)]] []
+    & evalState @[Link.Link] []
+    & evalState @[[Link.Link]] []
     & runM

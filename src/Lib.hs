@@ -8,6 +8,7 @@ import Data.Function
 import Data.Maybe
 import qualified Hakyll as H
 import Polysemy
+import System.FilePath.Posix (normalise)
 import Text.Blaze.Html.Renderer.Pretty
 
 data Site m a where
@@ -47,11 +48,8 @@ compileTemplates = H.match "templates/*" $ H.compile H.templateBodyCompiler
 compileMenu :: H.Rules ()
 compileMenu = H.match content $ do
   H.version "menu" $ H.compile $ do
-    item <- H.setVersion Nothing <$> H.getUnderlying
-    route <- H.getRoute item
-    case route of
-      Nothing -> H.noResult "No menu item"
-      Just r -> H.makeItem r
+    fp <- H.getResourceFilePath
+    H.makeItem (normalise fp)
 
 compileMarkdown :: H.Rules ()
 compileMarkdown = H.match content $ do

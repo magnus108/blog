@@ -31,6 +31,10 @@ tests =
           [ Just "projects/" @=? TZ.datum <$> (TZ.down "chair/" zipper >>= TZ.up)
           ],
         fromAssertions
+          "parents"
+          [ Just ["projects/", "chair/", "index.md"] @=? fmap TZ.datum <$> (TZ.parents <$> (TZ.down "index.md" =<< (TZ.down "chair/" zipper)))
+          ],
+        fromAssertions
           "firstChild"
           [ Just "chair/" @=? TZ.datum <$> (TZ.firstChild zipper)
           ],

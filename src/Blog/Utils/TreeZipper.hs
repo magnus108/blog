@@ -4,6 +4,7 @@ module Blog.Utils.TreeZipper
     fromRoseTree,
     toRoseTree,
     datum,
+    parents,
     down,
     downTo,
     up,
@@ -51,6 +52,13 @@ up :: TreeZipper a -> Maybe (TreeZipper a)
 up (TreeZipper item []) = Nothing
 up (TreeZipper item ((Context ls x rs) : bs)) =
   Just (TreeZipper (RT.roseTree x (ls <> [item] <> rs)) bs)
+
+parents :: TreeZipper a -> [TreeZipper a]
+parents tz = parent ++ [tz]
+  where
+    parent = case up tz of
+      Nothing -> []
+      Just x -> parents x
 
 rights' :: TreeZipper a -> [RT.RoseTree a]
 rights' (TreeZipper _ []) = []

@@ -6,6 +6,7 @@ module Blog.Utils.Menu.Tests
   )
 where
 
+import qualified Blog.Link as Link
 import qualified Blog.Menu as Menu
 import Blog.Table
 import qualified Blog.Utils.ForestZipper as FZ
@@ -27,44 +28,44 @@ tests =
       [ fromAssertions
           "makeMenu"
           [ forestZipper @=? (Menu.toForestZipper <$> (Menu.makeMenu project))
+          ],
+        fromAssertions
+          "showMenu"
+          [ Just [[Link.link "cv/" "cv/", Link.link "index.md" "index.md", Link.link "posts/" "posts/", Link.link "projects/" "projects/"]]
+              @=? ( run
+                      . execState @[[Link.Link]] []
+                      . evalState @[Link.Link] []
+                      . toListList
+                      . Menu.showMenu'
+                      <$> (Menu.makeMenu project)
+                  ),
+            Just [[Link.link "cv/" "cv/", Link.link "index.md" "index.md", Link.link "posts/" "posts/", Link.link "projects/" "projects/"], [Link.link "index.md" "cv/index.md"]]
+              @=? ( run
+                      . execState @[[Link.Link]] []
+                      . evalState @[Link.Link] []
+                      . toListList
+                      . Menu.showMenu'
+                      <$> (Menu.down "index.md" =<< (Menu.makeMenu project))
+                  )
+                  {-
+                    Just [["cv/", "index.md", "posts/", "projects/"], ["applicative/", "index.md", "tests/"], ["index.md"]]
+                      @=? ( run
+                              . execState @[[(String, String)]] []
+                              . evalState @[(String, String)] []
+                              . toListList
+                              . Menu.showMenu'
+                              <$> (Menu.down "index.md" =<< Menu.down "applicative/" =<< Menu.forward =<< Menu.forward =<< (Menu.makeMenu project))
+                          ),
+                    Just [["cv/", "index.md", "posts/", "projects/"], ["applicative/", "index.md", "tests/"]]
+                      @=? ( run
+                              . execState @[[(String, String)]] []
+                              . evalState @[(String, String)] []
+                              . toListList
+                              . Menu.showMenu'
+                              <$> ((Menu.moveTo "posts/applicative/") =<< (Menu.makeMenu project))
+                          )
+                  -}
           ]
-          {-,
-          fromAssertions
-            "showMenu"
-            [ Just [["cv/", "index.md", "posts/", "projects/"]]
-                @=? ( run
-                        . execState @[[(String, String)]] []
-                        . evalState @[(String, String)] []
-                        . toListList
-                        . Menu.showMenu'
-                        <$> (Menu.makeMenu project)
-                    ),
-              Just [["cv/", "index.md", "posts/", "projects/"], ["index.md"]]
-                @=? ( run
-                        . execState @[[(String, String)]] []
-                        . evalState @[(String, String)] []
-                        . toListList
-                        . Menu.showMenu'
-                        <$> (Menu.down "index.md" =<< (Menu.makeMenu project))
-                    ),
-              Just [["cv/", "index.md", "posts/", "projects/"], ["applicative/", "index.md", "tests/"], ["index.md"]]
-                @=? ( run
-                        . execState @[[(String, String)]] []
-                        . evalState @[(String, String)] []
-                        . toListList
-                        . Menu.showMenu'
-                        <$> (Menu.down "index.md" =<< Menu.down "applicative/" =<< Menu.forward =<< Menu.forward =<< (Menu.makeMenu project))
-                    ),
-              Just [["cv/", "index.md", "posts/", "projects/"], ["applicative/", "index.md", "tests/"]]
-                @=? ( run
-                        . execState @[[(String, String)]] []
-                        . evalState @[(String, String)] []
-                        . toListList
-                        . Menu.showMenu'
-                        <$> ((Menu.moveTo "posts/applicative/") =<< (Menu.makeMenu project))
-                    )
-            ]
-            -}
       ]
   where
     project =
