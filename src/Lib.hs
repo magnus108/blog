@@ -4,20 +4,35 @@ module Lib
 where
 
 import qualified Blog.Menu as M
+import Data.Function
 import Data.Maybe
 import qualified Hakyll as H
+import Polysemy
 import Text.Blaze.Html.Renderer.Pretty
+
+data Site m a where
+  Site :: Site m ()
+
+makeSem ''Site
+
+toSite :: (Member (Embed IO) r) => Sem (Site ': r) a -> Sem r a
+toSite =
+  interpret
+    ( \case
+        Site ->
+          embed $
+            H.hakyll $
+              sequence_
+                [ compileTemplates,
+                  compileContent
+                ]
+    )
+
+main :: IO ()
+main = toSite site & runM
 
 content :: H.Pattern
 content = "**.md"
-
-main :: IO ()
-main =
-  H.hakyll $
-    sequence_
-      [ compileTemplates,
-        compileContent
-      ]
 
 compileContent :: H.Rules ()
 compileContent =
@@ -62,4 +77,4 @@ getMenu = do
     Just r -> do
       items <- H.loadAll $ H.fromVersion $ Just "menu" :: (H.Compiler [H.Item String])
       let menu = M.makeMenu (fmap H.itemBody items)
-      return (fromMaybe "" (renderHtml . M.showMenu <$> menu))
+      return (fromMaybe "" (renderHtml . M.showMenu <$> (M.moveTo r =<< menu)))

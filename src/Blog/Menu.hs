@@ -2,11 +2,13 @@ module Blog.Menu
   ( Menu,
     menu,
     down,
+    moveTo,
     showMenu,
     forward,
     showMenu',
     makeMenu,
     toForestZipper,
+    downTo,
   )
 where
 
@@ -33,6 +35,12 @@ down x = fmap menu . FZ.down x . toForestZipper
 
 forward :: Menu -> Maybe Menu
 forward = fmap menu . FZ.forward . toForestZipper
+
+downTo :: FilePath -> Menu -> Maybe Menu
+downTo x = fmap Menu . FZ.downTo (splitPath x) . toForestZipper
+
+moveTo :: FilePath -> Menu -> Maybe Menu
+moveTo x = fmap Menu . FZ.moveTo (splitPath x) . toForestZipper
 
 makeMenu :: [FilePath] -> Maybe Menu
 makeMenu = fmap menu . FZ.fromForest . R.fromTrie . Tr.trie . fmap splitPath

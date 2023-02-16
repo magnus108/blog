@@ -5,6 +5,7 @@ module Blog.Utils.TreeZipper
     toRoseTree,
     datum,
     down,
+    downTo,
     up,
     firstChild,
     lefts,
@@ -41,6 +42,10 @@ down x (TreeZipper rt bs) =
         y : ys ->
           Just (TreeZipper y (Context ls (RT.datum rt) ys : bs))
         _ -> Nothing
+
+downTo :: Eq a => [a] -> TreeZipper a -> Maybe (TreeZipper a)
+downTo [] tz = Just tz
+downTo (x : xs) tz = downTo xs =<< down x tz
 
 up :: TreeZipper a -> Maybe (TreeZipper a)
 up (TreeZipper item []) = Nothing

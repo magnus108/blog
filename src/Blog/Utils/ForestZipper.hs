@@ -2,7 +2,9 @@ module Blog.Utils.ForestZipper
   ( ForestZipper,
     datum,
     fromForest,
+    moveTo,
     down,
+    downTo,
     up,
     backward,
     forward,
@@ -35,8 +37,8 @@ ancestors :: Eq a => ForestZipper a -> [[a]]
 ancestors fz = fmap TZ.datum <$> ancestors' [] fz
   where
     ancestors' acc fz' = case parent of
-      Nothing -> acc
-      Just fz'' -> ancestors' (siblings fz'' : acc) fz''
+      Nothing -> siblings fz' : acc
+      Just fz'' -> ancestors' (siblings fz' : acc) fz''
       where
         parent = up fz'
 
@@ -45,6 +47,20 @@ fromForest xs = ForestZipper <$> LZ.fromList (TZ.fromRoseTree <$> RT.toList xs)
 
 down :: (Eq a) => a -> ForestZipper a -> Maybe (ForestZipper a)
 down x (ForestZipper lz) = (\y -> ForestZipper (LZ.setFocus y lz)) <$> TZ.down x (LZ.focus lz)
+
+downTo :: (Eq a) => [a] -> ForestZipper a -> Maybe (ForestZipper a)
+downTo xs (ForestZipper lz) = (\y -> ForestZipper (LZ.setFocus y lz)) <$> TZ.downTo xs (LZ.focus lz)
+
+moveTo :: Eq a => [a] -> ForestZipper a -> Maybe (ForestZipper a)
+moveTo [] tz = Just tz
+moveTo (x : xs) tz = downTo xs =<< findIt x tz
+  where
+    findIt x' tz' =
+      if (x' == (datum tz'))
+        then Just tz'
+        else case forward tz' of
+          Nothing -> Nothing
+          Just tz'' -> findIt x' tz''
 
 up :: ForestZipper a -> Maybe (ForestZipper a)
 up (ForestZipper lz) = (\y -> ForestZipper (LZ.setFocus y lz)) <$> TZ.up (LZ.focus lz)
