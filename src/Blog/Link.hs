@@ -3,7 +3,7 @@ module Blog.Link
     link,
     name,
     href,
-    linkFromTreeZipper,
+    fromTreeZipper,
   )
 where
 
@@ -19,5 +19,5 @@ data Link = Link
 link :: String -> String -> Link
 link = Link
 
-linkFromTreeZipper :: TZ.TreeZipper FilePath -> Link
-linkFromTreeZipper tz = Link (TZ.datum tz) (mconcat $ TZ.datum <$> TZ.parents tz)
+fromTreeZipper :: TZ.TreeZipper FilePath -> Link
+fromTreeZipper tz = Link (TZ.datum tz) (mconcat $ TZ.datum <$> TZ.parents tz)

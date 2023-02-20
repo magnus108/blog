@@ -12,11 +12,9 @@ where
 
 import qualified Blog.Link as Link
 import qualified Blog.Utils.ListZipper as LZ
-import qualified Blog.Utils.TreeZipper as TZ
 import Control.Monad
 import Polysemy
 import Polysemy.State
-import Text.Blaze (stringValue)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Internal

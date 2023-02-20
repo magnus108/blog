@@ -55,7 +55,7 @@ showMenu' :: (Member T.Table r) => Menu -> Sem r ()
 showMenu' m = do
   let xs = FZ.ancestors $ toForestZipper m
   let tableData = mapMaybe LZ.fromList xs :: [LZ.ListZipper (TZ.TreeZipper FilePath)]
-  T.table (fmap Link.linkFromTreeZipper <$> tableData)
+  T.table (fmap Link.fromTreeZipper <$> tableData)
 
 showMenu :: Menu -> H.Html
 showMenu m =

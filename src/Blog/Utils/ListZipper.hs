@@ -1,7 +1,5 @@
 module Blog.Utils.ListZipper
   ( ListZipper,
-    setFocus,
-    mapFocus,
     fromList,
     toList,
     backward,
@@ -13,10 +11,10 @@ where
 
 import Control.Comonad
 import qualified Data.List.NonEmpty as NE
-import Data.Maybe
 
 data ListZipper a = ListZipper [a] a [a]
-  deriving stock (Eq, Show)
+  deriving stock (Eq)
+  deriving stock (Show)
   deriving stock (Functor)
   deriving stock (Foldable)
   deriving stock (Traversable)
@@ -32,12 +30,6 @@ instance Comonad ListZipper where
 
 listZipper :: [a] -> a -> [a] -> ListZipper a
 listZipper ls x rs = ListZipper ls x rs
-
-setFocus :: a -> ListZipper a -> ListZipper a
-setFocus y (ListZipper ls _ rs) = listZipper ls y rs
-
-mapFocus :: (a -> a) -> ListZipper a -> ListZipper a
-mapFocus f (ListZipper ls x rs) = listZipper ls (f x) rs
 
 fromList :: [a] -> Maybe (ListZipper a)
 fromList [] = Nothing

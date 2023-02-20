@@ -5,6 +5,7 @@ where
 
 import qualified Blog.Utils.Forest.Tests
 import qualified Blog.Utils.ForestZipper.Tests
+import qualified Blog.Utils.Link.Tests
 import qualified Blog.Utils.ListZipper.Tests
 import qualified Blog.Utils.Menu.Tests
 import qualified Blog.Utils.RoseTree.Tests
@@ -26,5 +27,6 @@ main =
         Blog.Utils.ForestZipper.Tests.tests,
         Blog.Utils.Table.Tests.tests,
         Blog.Utils.Menu.Tests.tests,
-        Blog.Utils.Forest.Tests.tests
+        Blog.Utils.Forest.Tests.tests,
+        Blog.Utils.Link.Tests.tests
       ]

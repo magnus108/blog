@@ -5,7 +5,7 @@ where
 
 import qualified Blog.Utils.RoseTree as R
 import qualified Blog.Utils.TreeZipper as TZ
-import System.FilePath (splitPath)
+import Data.Functor
 import Test.Tasty
 import Test.Tasty.HUnit
 import TestSuite.Util
@@ -20,46 +20,98 @@ tests =
           ],
         fromAssertions
           "down"
-          [ Just "chair/" @=? TZ.datum <$> TZ.down "chair/" zipper
+          [ Just "chair/"
+              @=? ( TZ.down "chair/" zipper
+                      <&> TZ.datum
+                  )
           ],
         fromAssertions
           "downTo"
-          [ Just "door/" @=? TZ.datum <$> TZ.downTo ["kitchen/", "door/"] zipper
+          [ Just "door/"
+              @=? ( TZ.downTo ["kitchen/", "door/"] zipper
+                      <&> TZ.datum
+                  )
           ],
         fromAssertions
           "up"
-          [ Just "projects/" @=? TZ.datum <$> (TZ.down "chair/" zipper >>= TZ.up)
+          [ Just "projects/"
+              @=? ( TZ.down "chair/" zipper
+                      >>= TZ.up
+                      <&> TZ.datum
+                  )
           ],
         fromAssertions
           "parents"
-          [ Just ["projects/", "chair/", "index.md"] @=? fmap TZ.datum <$> (TZ.parents <$> (TZ.down "index.md" =<< (TZ.down "chair/" zipper)))
+          [ Just ["projects/", "chair/", "index.md"]
+              @=? ( TZ.downTo ["chair/", "index.md"] zipper
+                      <&> TZ.parents
+                      <&> fmap TZ.datum
+                  )
           ],
         fromAssertions
           "firstChild"
-          [ Just "chair/" @=? TZ.datum <$> (TZ.firstChild zipper)
+          [ Just "chair/"
+              @=? ( TZ.firstChild zipper
+                      <&> TZ.datum
+                  )
           ],
         fromAssertions
           "lefts"
           [ [] @=? TZ.lefts zipper,
-            Just [] @=? fmap TZ.datum <$> TZ.lefts <$> TZ.down "chair/" zipper,
-            Just ["chair/"] @=? fmap TZ.datum <$> TZ.lefts <$> TZ.down "kitchen/" zipper,
-            Just ["chair/", "kitchen/"] @=? fmap TZ.datum <$> TZ.lefts <$> TZ.down "lamp/" zipper
+            Just []
+              @=? ( TZ.down "chair/" zipper
+                      <&> TZ.lefts
+                      <&> fmap TZ.datum
+                  ),
+            Just ["chair/"]
+              @=? ( TZ.down "kitchen/" zipper
+                      <&> TZ.lefts
+                      <&> fmap TZ.datum
+                  ),
+            Just ["chair/", "kitchen/"]
+              @=? ( TZ.down "lamp/" zipper
+                      <&> TZ.lefts
+                      <&> fmap TZ.datum
+                  )
           ],
         fromAssertions
           "rights"
           [ [] @=? TZ.rights zipper,
-            Just ["kitchen/", "lamp/"] @=? fmap TZ.datum <$> TZ.rights <$> TZ.down "chair/" zipper,
-            Just ["lamp/"] @=? fmap TZ.datum <$> TZ.rights <$> TZ.down "kitchen/" zipper,
-            Just [] @=? fmap TZ.datum <$> TZ.rights <$> TZ.down "lamp/" zipper
+            Just ["kitchen/", "lamp/"]
+              @=? ( TZ.down "chair/" zipper
+                      <&> TZ.rights
+                      <&> fmap TZ.datum
+                  ),
+            Just ["lamp/"]
+              @=? ( TZ.down "kitchen/" zipper
+                      <&> TZ.rights
+                      <&> fmap TZ.datum
+                  ),
+            Just []
+              @=? ( TZ.down "lamp/" zipper
+                      <&> TZ.rights
+                      <&> fmap TZ.datum
+                  )
           ],
         fromAssertions
           "children"
-          [ ["chair/", "kitchen/", "lamp/"] @=? TZ.datum <$> TZ.children zipper,
-            Just ["index.md"] @=? fmap TZ.datum <$> TZ.children <$> TZ.down "chair/" zipper
+          [ ["chair/", "kitchen/", "lamp/"]
+              @=? ( TZ.children zipper
+                      <&> TZ.datum
+                  ),
+            Just ["index.md"]
+              @=? ( TZ.down "chair/" zipper
+                      <&> TZ.children
+                      <&> fmap TZ.datum
+                  )
           ],
         fromAssertions
           "siblings"
-          [ Just ["chair/", "kitchen/", "lamp/"] @=? fmap TZ.datum <$> TZ.siblings <$> TZ.down "chair/" zipper
+          [ Just ["chair/", "kitchen/", "lamp/"]
+              @=? ( TZ.down "chair/" zipper
+                      <&> TZ.siblings
+                      <&> fmap TZ.datum
+                  )
           ]
       ]
   where

@@ -16,16 +16,17 @@ module Blog.Utils.TreeZipper
   )
 where
 
---------------------------------------------------------------------------------
 import qualified Blog.Utils.RoseTree as RT
 
---------------------------------------------------------------------------------
-
 data Context a = Context [RT.RoseTree a] a [RT.RoseTree a]
-  deriving stock (Show, Eq, Ord)
+  deriving stock (Show)
+  deriving stock (Eq)
+  deriving stock (Ord)
 
 data TreeZipper a = TreeZipper (RT.RoseTree a) [Context a]
-  deriving stock (Show, Eq, Ord)
+  deriving stock (Show)
+  deriving stock (Eq)
+  deriving stock (Ord)
 
 fromRoseTree :: RT.RoseTree a -> TreeZipper a
 fromRoseTree x = TreeZipper x []
@@ -43,10 +44,6 @@ down x (TreeZipper rt bs) =
         y : ys ->
           Just (TreeZipper y (Context ls (RT.datum rt) ys : bs))
         _ -> Nothing
-
-downTo :: Eq a => [a] -> TreeZipper a -> Maybe (TreeZipper a)
-downTo [] tz = Just tz
-downTo (x : xs) tz = downTo xs =<< down x tz
 
 up :: TreeZipper a -> Maybe (TreeZipper a)
 up (TreeZipper item []) = Nothing
@@ -90,7 +87,7 @@ rights tz =
   let next = nextSibling tz
    in case next of
         Nothing -> []
-        Just next' -> next' : (rights next')
+        Just next' -> next' : rights next'
 
 lefts :: Eq a => TreeZipper a -> [TreeZipper a]
 lefts tz =
@@ -104,7 +101,11 @@ children tz =
   let child = firstChild tz
    in case child of
         Nothing -> []
-        Just child' -> child' : (rights child')
+        Just child' -> child' : rights child'
 
 siblings :: Eq a => TreeZipper a -> [TreeZipper a]
 siblings tz = lefts tz ++ (tz : rights tz)
+
+downTo :: Eq a => [a] -> TreeZipper a -> Maybe (TreeZipper a)
+downTo [] tz = Just tz
+downTo (x : xs) tz = downTo xs =<< down x tz

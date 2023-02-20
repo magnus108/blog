@@ -4,10 +4,12 @@ module Blog.Utils.ForestZipper.Tests
 where
 
 import qualified Blog.Utils.Forest as F
+import Blog.Utils.ForestZipper (ancestors)
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.RoseTree as R
 import qualified Blog.Utils.TreeZipper as TZ
 import Data.Function
+import Data.Functor
 import System.FilePath (splitPath)
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -19,22 +21,63 @@ tests =
     concat
       [ fromAssertions
           "datum"
-          [ Just "index.md" @=? FZ.datum <$> forestZipper
+          [ Just "index.md"
+              @=? ( forestZipper
+                      <&> FZ.datum
+                  )
           ],
         fromAssertions
           "siblings"
-          [ Just ["index.md", "cv/", "posts/", "projects/"] @=? fmap TZ.datum <$> (FZ.siblings <$> forestZipper),
-            Just ["applicative/", "index.md", "tests/"] @=? fmap TZ.datum <$> (FZ.siblings <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/")),
-            Just ["index.md"] @=? fmap TZ.datum <$> (FZ.siblings <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/" >>= FZ.down "index.md"))
+          [ Just ["index.md", "cv/", "posts/", "projects/"]
+              @=? ( forestZipper
+                      <&> FZ.siblings
+                      <&> fmap TZ.datum
+                  ),
+            Just ["applicative/", "index.md", "tests/"]
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "applicative/"
+                      <&> FZ.siblings
+                      <&> fmap TZ.datum
+                  ),
+            Just ["index.md"]
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "applicative/"
+                      >>= FZ.down "index.md"
+                      <&> FZ.siblings
+                      <&> fmap TZ.datum
+                  )
           ],
         fromAssertions
           "down"
-          [ Just "applicative/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/")
+          [ Just "applicative/"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "applicative/"
+                      <&> FZ.datum
+                  )
           ],
         fromAssertions
           "downTo"
-          [ Just "index.md" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.downTo ["applicative/", "index.md"]),
-            Just "handle/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.forward >>= FZ.downTo ["kitchen/", "door/", "handle/"])
+          [ Just "index.md"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.downTo ["applicative/", "index.md"]
+                      <&> FZ.datum
+                  ),
+            Just "handle/"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.downTo ["kitchen/", "door/", "handle/"]
+                      <&> FZ.datum
+                  )
           ],
         fromAssertions
           "up"
@@ -49,11 +92,59 @@ tests =
           ],
         fromAssertions
           "forward"
-          [ Just "posts/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward)
+          [ Just "posts/"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      <&> FZ.datum
+                  )
           ],
         fromAssertions
           "backward"
-          [ Just "cv/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.backward)
+          [ Just "cv/"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.backward
+                      <&> FZ.datum
+                  )
+          ],
+        fromAssertions
+          "moveTo"
+          [ Just "index.md"
+              @=? ( forestZipper
+                      >>= FZ.moveTo ["posts/", "applicative/", "index.md"]
+                      <&> FZ.datum
+                  ),
+            Just "handle/"
+              @=? ( forestZipper
+                      >>= FZ.moveTo ["projects/", "kitchen/", "door/", "handle/"]
+                      <&> FZ.datum
+                  )
+          ],
+        fromAssertions
+          "ancestors"
+          [ Just
+              [ ["posts/", "posts/", "posts/", "posts/"],
+                ["applicative/", "index.md", "tests/"],
+                ["index.md"]
+              ]
+              @=? ( forestZipper
+                      >>= FZ.moveTo ["posts/", "applicative/", "index.md"]
+                      <&> FZ.ancestors
+                      <&> fmap (fmap TZ.datum)
+                  ),
+            Just
+              [ ["projects/", "projects/", "projects/", "projects/"],
+                ["chair/", "kitchen/", "table/"],
+                ["door/"],
+                ["handle/"]
+              ]
+              @=? ( forestZipper
+                      >>= FZ.moveTo ["projects/", "kitchen/", "door/", "handle/"]
+                      <&> FZ.ancestors
+                      <&> fmap (fmap TZ.datum)
+                  )
           ]
       ]
   where
