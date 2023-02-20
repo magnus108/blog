@@ -37,7 +37,19 @@ tests =
     concat
       [ fromAssertions
           "table"
-          [ [[Link.link "a0" "l0", Link.link "b0" "l0", Link.link "c0" "l0"], [Link.link "a1" "l1", Link.link "b1" "l1", Link.link "c1" "l1"], [Link.link "a2" "l2", Link.link "b2" "l2", Link.link "c2" "l2"]]
+          [ [ [ Link.link "a0" "l0",
+                Link.link "b0" "l0",
+                Link.link "c0" "l0"
+              ],
+              [ Link.link "a1" "l1",
+                Link.link "b1" "l1",
+                Link.link "c1" "l1"
+              ],
+              [ Link.link "a2" "l2",
+                Link.link "b2" "l2",
+                Link.link "c2" "l2"
+              ]
+            ]
               @=? ( example
                       & toListList
                       & evalState @[Link.Link] []

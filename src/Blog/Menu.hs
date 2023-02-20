@@ -14,6 +14,7 @@ where
 
 import qualified Blog.Link as Link
 import qualified Blog.Table as T
+import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
 import qualified Blog.Utils.RoseTree as R
@@ -45,7 +46,7 @@ moveTo :: FilePath -> Menu -> Maybe Menu
 moveTo x = fmap Menu . FZ.moveTo (splitPath x) . toForestZipper
 
 makeMenu :: [FilePath] -> Maybe Menu
-makeMenu = fmap menu . FZ.fromForest . R.fromTrie . Tr.trie . fmap splitPath
+makeMenu = fmap menu . FZ.fromForest . F.fromTrie . Tr.trie . fmap splitPath
 
 toForestZipper :: Menu -> FZ.ForestZipper FilePath
 toForestZipper (Menu tz) = tz

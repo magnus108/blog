@@ -14,6 +14,7 @@ dependencies:
 - blaze-markup
 - polysemy
 - extra
+- comonad
 
 ghc-options:
 - -Wall

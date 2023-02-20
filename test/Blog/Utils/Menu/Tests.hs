@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-{-# HLINT ignore "Use ++" #-}
 module Blog.Utils.Menu.Tests
   ( tests,
   )
@@ -9,8 +6,8 @@ where
 import qualified Blog.Link as Link
 import qualified Blog.Menu as Menu
 import Blog.Table
+import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
-import Blog.Utils.ListZipper
 import qualified Blog.Utils.RoseTree as R
 import qualified Blog.Utils.TreeZipper as TZ
 import Control.Monad.Writer
@@ -82,7 +79,7 @@ tests =
       ]
     forestZipper =
       FZ.fromForest $
-        R.forest
+        F.forest
           [ R.roseTree "cv/" [R.roseTree "index.md" []],
             R.roseTree "index.md" [],
             R.roseTree

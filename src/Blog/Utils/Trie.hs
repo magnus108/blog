@@ -7,10 +7,7 @@ module Blog.Utils.Trie
   )
 where
 
---------------------------------------------------------------------------------
 import qualified Data.Map as M
-
---------------------------------------------------------------------------------
 
 data Trie a = Trie (M.Map a (Trie a))
   deriving stock (Show, Eq)

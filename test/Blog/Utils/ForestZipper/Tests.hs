@@ -3,9 +3,11 @@ module Blog.Utils.ForestZipper.Tests
   )
 where
 
+import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.RoseTree as R
 import qualified Blog.Utils.TreeZipper as TZ
+import Data.Function
 import System.FilePath (splitPath)
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -36,7 +38,14 @@ tests =
           ],
         fromAssertions
           "up"
-          [ Just "posts/" @=? FZ.datum <$> (forestZipper >>= FZ.forward >>= FZ.forward >>= FZ.down "applicative/" >>= FZ.up)
+          [ Just "posts/"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "applicative/"
+                      >>= FZ.up
+                      & fmap FZ.datum
+                  )
           ],
         fromAssertions
           "forward"
@@ -50,7 +59,7 @@ tests =
   where
     forestZipper =
       FZ.fromForest $
-        R.forest
+        F.forest
           [ R.roseTree "index.md" [],
             R.roseTree "cv/" [R.roseTree "index.md" []],
             R.roseTree

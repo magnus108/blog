@@ -1,7 +1,5 @@
 module Blog.Utils.ListZipper
   ( ListZipper,
-    focus,
-    listZipper,
     setFocus,
     mapFocus,
     fromList,
@@ -13,40 +11,47 @@ module Blog.Utils.ListZipper
   )
 where
 
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+import Control.Comonad
+import qualified Data.List.NonEmpty as NE
+import Data.Maybe
 
 data ListZipper a = ListZipper [a] a [a]
   deriving stock (Eq, Show)
-  deriving (Functor)
-  deriving (Foldable)
-  deriving (Traversable)
+  deriving stock (Functor)
+  deriving stock (Foldable)
+  deriving stock (Traversable)
+
+instance Comonad ListZipper where
+  extract (ListZipper _ x _) = x
+  duplicate a = ListZipper (shift backward) a (shift forward)
+    where
+      shift move = NE.tail $ iterate move a
+      iterate f x = case f x of
+        Just x' -> NE.cons x (iterate f x')
+        Nothing -> NE.singleton x
 
 listZipper :: [a] -> a -> [a] -> ListZipper a
-listZipper ls x rs = ListZipper (reverse ls) x rs
+listZipper ls x rs = ListZipper ls x rs
 
 setFocus :: a -> ListZipper a -> ListZipper a
-setFocus y (ListZipper ls _ rs) = ListZipper ls y rs
+setFocus y (ListZipper ls _ rs) = listZipper ls y rs
 
 mapFocus :: (a -> a) -> ListZipper a -> ListZipper a
-mapFocus f (ListZipper ls x rs) = ListZipper ls (f x) rs
-
-focus :: ListZipper a -> a
-focus (ListZipper _ x _) = x
+mapFocus f (ListZipper ls x rs) = listZipper ls (f x) rs
 
 fromList :: [a] -> Maybe (ListZipper a)
 fromList [] = Nothing
-fromList (x : xs) = Just $ ListZipper [] x xs
+fromList (x : xs) = Just $ listZipper [] x xs
 
 toList :: ListZipper a -> [a]
-toList x = lefts x <> (focus x : rights x)
+toList x = lefts x <> (extract x : rights x)
 
 backward :: ListZipper a -> Maybe (ListZipper a)
-backward (ListZipper (l : ls) a rs) = Just (ListZipper ls l (a : rs))
+backward (ListZipper (l : ls) a rs) = Just (listZipper ls l (a : rs))
 backward (ListZipper [] _ _) = Nothing
 
 forward :: ListZipper a -> Maybe (ListZipper a)
-forward (ListZipper ls a (r : rs)) = Just (ListZipper (a : ls) r rs)
+forward (ListZipper ls a (r : rs)) = Just (listZipper (a : ls) r rs)
 forward (ListZipper _ _ []) = Nothing
 
 lefts :: ListZipper a -> [a]
