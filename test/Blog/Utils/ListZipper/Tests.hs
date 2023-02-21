@@ -26,6 +26,15 @@ tests =
                   )
           ],
         fromAssertions
+          "setFocus"
+          [ Just [1, 5, 3]
+              @=? ( LZ.fromList [1, 2, 3]
+                      >>= LZ.forward
+                      <&> LZ.setFocus 5
+                      <&> LZ.toList
+                  )
+          ],
+        fromAssertions
           "toList"
           [ Just [1, 2, 3]
               @=? ( LZ.fromList [1, 2, 3]

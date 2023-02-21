@@ -14,8 +14,6 @@ where
 import Control.Comonad
 import qualified Data.List.NonEmpty as NE
 
-setFocus y (ListZipper ls _ rs) = listZipper ls y rs
-
 data ListZipper a = ListZipper [a] a [a]
   deriving stock (Eq)
   deriving stock (Show)
@@ -31,6 +29,9 @@ instance Comonad ListZipper where
       iterate f x = case f x of
         Just x' -> NE.cons x (iterate f x')
         Nothing -> NE.singleton x
+
+setFocus :: a -> ListZipper a -> ListZipper a
+setFocus y (ListZipper ls _ rs) = listZipper ls y rs
 
 singleton :: a -> ListZipper a
 singleton x = listZipper [] x []
