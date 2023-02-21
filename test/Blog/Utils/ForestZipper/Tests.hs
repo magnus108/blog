@@ -27,28 +27,30 @@ tests =
                   )
           ],
         fromAssertions
-          "siblings"
-          [ Just ["index.md", "cv/", "posts/", "projects/"]
-              @=? ( forestZipper
-                      <&> FZ.siblings
-                      <&> fmap TZ.datum
-                  ),
-            Just ["applicative/", "index.md", "tests/"]
+          "up"
+          [ Just "posts/"
               @=? ( forestZipper
                       >>= FZ.forward
                       >>= FZ.forward
                       >>= FZ.down "applicative/"
-                      <&> FZ.siblings
-                      <&> fmap TZ.datum
+                      >>= FZ.up
+                      & fmap FZ.datum
                   ),
-            Just ["index.md"]
+            Just "applicative/"
               @=? ( forestZipper
                       >>= FZ.forward
                       >>= FZ.forward
                       >>= FZ.down "applicative/"
                       >>= FZ.down "index.md"
-                      <&> FZ.siblings
-                      <&> fmap TZ.datum
+                      >>= FZ.up
+                      & fmap FZ.datum
+                  ),
+            Nothing
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.up
+                      & fmap FZ.datum
                   )
           ],
         fromAssertions
@@ -87,30 +89,13 @@ tests =
                   )
           ],
         fromAssertions
-          "up"
-          [ Just "posts/"
+          "backward"
+          [ Just "cv/"
               @=? ( forestZipper
                       >>= FZ.forward
                       >>= FZ.forward
-                      >>= FZ.down "applicative/"
-                      >>= FZ.up
-                      & fmap FZ.datum
-                  ),
-            Just "applicative/"
-              @=? ( forestZipper
-                      >>= FZ.forward
-                      >>= FZ.forward
-                      >>= FZ.down "applicative/"
-                      >>= FZ.down "index.md"
-                      >>= FZ.up
-                      & fmap FZ.datum
-                  ),
-            Nothing
-              @=? ( forestZipper
-                      >>= FZ.forward
-                      >>= FZ.forward
-                      >>= FZ.up
-                      & fmap FZ.datum
+                      >>= FZ.backward
+                      <&> FZ.datum
                   )
           ],
         fromAssertions
@@ -123,13 +108,36 @@ tests =
                   )
           ],
         fromAssertions
-          "backward"
-          [ Just "cv/"
+          "siblings"
+          [ Just "projects/"
+              @=? ( forestZipper
+                      <&> FZ.setFocus treeZipper
+                      <&> FZ.datum
+                  )
+          ],
+        fromAssertions
+          "siblings"
+          [ Just ["index.md", "cv/", "posts/", "projects/"]
+              @=? ( forestZipper
+                      <&> FZ.siblings
+                      <&> fmap TZ.datum
+                  ),
+            Just ["applicative/", "index.md", "tests/"]
               @=? ( forestZipper
                       >>= FZ.forward
                       >>= FZ.forward
-                      >>= FZ.backward
-                      <&> FZ.datum
+                      >>= FZ.down "applicative/"
+                      <&> FZ.siblings
+                      <&> fmap TZ.datum
+                  ),
+            Just ["index.md"]
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "applicative/"
+                      >>= FZ.down "index.md"
+                      <&> FZ.siblings
+                      <&> fmap TZ.datum
                   )
           ],
         fromAssertions
@@ -171,6 +179,24 @@ tests =
           ]
       ]
   where
+    treeZipper =
+      TZ.fromRoseTree $
+        R.roseTree
+          "projects/"
+          [ R.roseTree
+              "chair/"
+              [R.roseTree "index.md" []],
+            R.roseTree
+              "kitchen/"
+              [ R.roseTree
+                  "door/"
+                  [ R.roseTree
+                      "handle/"
+                      [R.roseTree "index.md" []]
+                  ]
+              ],
+            R.roseTree "lamp/" []
+          ]
     forestZipper =
       FZ.fromForest $
         F.forest

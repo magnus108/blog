@@ -2,14 +2,15 @@ module Blog.Utils.ForestZipper
   ( ForestZipper,
     fromForest,
     datum,
+    up,
     down,
     downTo,
-    up,
     backward,
     forward,
+    setFocus,
     siblings,
-    moveTo,
     ancestors,
+    moveTo,
   )
 where
 
@@ -22,11 +23,36 @@ data ForestZipper a = ForestZipper (LZ.ListZipper (TZ.TreeZipper a))
   deriving stock (Show)
   deriving stock (Eq)
 
+toListZipper :: ForestZipper a -> LZ.ListZipper (TZ.TreeZipper a)
+toListZipper (ForestZipper x) = x
+
+fromForest :: F.Forest a -> Maybe (ForestZipper a)
+fromForest xs = ForestZipper <$> LZ.fromList (TZ.fromRoseTree <$> F.toList xs)
+
 datum :: ForestZipper a -> a
 datum (ForestZipper lz) = TZ.datum $ extract lz
 
-toListZipper :: ForestZipper a -> LZ.ListZipper (TZ.TreeZipper a)
-toListZipper (ForestZipper x) = x
+up :: ForestZipper a -> Maybe (ForestZipper a)
+up (ForestZipper lz) = flip setFocus (ForestZipper lz) <$> TZ.up (extract lz)
+
+down :: (Eq a) => a -> ForestZipper a -> Maybe (ForestZipper a)
+down xs (ForestZipper lz) =
+  flip setFocus (ForestZipper lz)
+    <$> TZ.down xs (extract lz)
+
+downTo :: (Eq a) => [a] -> ForestZipper a -> Maybe (ForestZipper a)
+downTo xs (ForestZipper lz) =
+  flip setFocus (ForestZipper lz)
+    <$> TZ.downTo xs (extract lz)
+
+setFocus :: TZ.TreeZipper a -> ForestZipper a -> ForestZipper a
+setFocus a (ForestZipper lz) = ForestZipper $ LZ.setFocus a lz
+
+backward :: ForestZipper a -> Maybe (ForestZipper a)
+backward (ForestZipper lz) = ForestZipper <$> LZ.backward lz
+
+forward :: ForestZipper a -> Maybe (ForestZipper a)
+forward (ForestZipper lz) = ForestZipper <$> LZ.forward lz
 
 siblings :: Eq a => ForestZipper a -> [TZ.TreeZipper a]
 siblings fz@(ForestZipper lz) = case parent of
@@ -44,19 +70,6 @@ ancestors fz = ancestors' [] fz
       where
         parent = up fz'
 
-fromForest :: F.Forest a -> Maybe (ForestZipper a)
-fromForest xs = ForestZipper <$> LZ.fromList (TZ.fromRoseTree <$> F.toList xs)
-
-down :: (Eq a) => a -> ForestZipper a -> Maybe (ForestZipper a)
-down xs (ForestZipper lz) =
-  ForestZipper . flip LZ.setFocus lz
-    <$> TZ.down xs (extract lz)
-
-downTo :: (Eq a) => [a] -> ForestZipper a -> Maybe (ForestZipper a)
-downTo xs (ForestZipper lz) =
-  ForestZipper . flip LZ.setFocus lz
-    <$> TZ.downTo xs (extract lz)
-
 moveTo :: Eq a => [a] -> ForestZipper a -> Maybe (ForestZipper a)
 moveTo [] tz = Just tz
 moveTo (x : xs) tz = downTo xs =<< findIt x tz
@@ -67,17 +80,3 @@ moveTo (x : xs) tz = downTo xs =<< findIt x tz
         else case forward tz' of
           Nothing -> Nothing
           Just tz'' -> findIt x' tz''
-
-up :: ForestZipper a -> Maybe (ForestZipper a)
-up (ForestZipper lz) =
-  ForestZipper . flip LZ.setFocus lz
-    <$> TZ.up (extract lz)
-
-setFocus :: ForestZipper a -> TZ.TreeZipper a -> ForestZipper a
-setFocus (ForestZipper lz) a = ForestZipper $ LZ.setFocus a lz
-
-backward :: ForestZipper a -> Maybe (ForestZipper a)
-backward (ForestZipper lz) = ForestZipper <$> LZ.backward lz
-
-forward :: ForestZipper a -> Maybe (ForestZipper a)
-forward (ForestZipper lz) = ForestZipper <$> LZ.forward lz
