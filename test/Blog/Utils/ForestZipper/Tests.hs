@@ -59,6 +59,13 @@ tests =
                       >>= FZ.forward
                       >>= FZ.down "applicative/"
                       <&> FZ.datum
+                  ),
+            Nothing
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "NOPE/"
+                      <&> FZ.datum
                   )
           ],
         fromAssertions
@@ -86,6 +93,22 @@ tests =
                       >>= FZ.forward
                       >>= FZ.forward
                       >>= FZ.down "applicative/"
+                      >>= FZ.up
+                      & fmap FZ.datum
+                  ),
+            Just "applicative/"
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
+                      >>= FZ.down "applicative/"
+                      >>= FZ.down "index.md"
+                      >>= FZ.up
+                      & fmap FZ.datum
+                  ),
+            Nothing
+              @=? ( forestZipper
+                      >>= FZ.forward
+                      >>= FZ.forward
                       >>= FZ.up
                       & fmap FZ.datum
                   )
@@ -125,7 +148,7 @@ tests =
         fromAssertions
           "ancestors"
           [ Just
-              [ ["posts/", "posts/", "posts/", "posts/"],
+              [ ["index.md", "cv/", "posts/", "projects/"],
                 ["applicative/", "index.md", "tests/"],
                 ["index.md"]
               ]
@@ -135,7 +158,7 @@ tests =
                       <&> fmap (fmap TZ.datum)
                   ),
             Just
-              [ ["projects/", "projects/", "projects/", "projects/"],
+              [ ["index.md", "cv/", "posts/", "projects/"],
                 ["chair/", "kitchen/", "table/"],
                 ["door/"],
                 ["handle/"]

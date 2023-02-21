@@ -48,16 +48,10 @@ fromForest :: F.Forest a -> Maybe (ForestZipper a)
 fromForest xs = ForestZipper <$> LZ.fromList (TZ.fromRoseTree <$> F.toList xs)
 
 down :: (Eq a) => a -> ForestZipper a -> Maybe (ForestZipper a)
-down xs (ForestZipper lz) = ForestZipper <$> y
-  where
-    x = TZ.down xs (extract lz)
-    y = sequence $ extend (const x) lz
+down x (ForestZipper lz) = (\y -> ForestZipper (LZ.setFocus y lz)) <$> TZ.down x (extract lz)
 
 downTo :: (Eq a) => [a] -> ForestZipper a -> Maybe (ForestZipper a)
-downTo xs (ForestZipper lz) = ForestZipper <$> y
-  where
-    x = TZ.downTo xs (extract lz)
-    y = sequence $ extend (const x) lz
+downTo xs (ForestZipper lz) = (\y -> ForestZipper (LZ.setFocus y lz)) <$> TZ.downTo xs (extract lz)
 
 moveTo :: Eq a => [a] -> ForestZipper a -> Maybe (ForestZipper a)
 moveTo [] tz = Just tz
@@ -71,10 +65,7 @@ moveTo (x : xs) tz = downTo xs =<< findIt x tz
           Just tz'' -> findIt x' tz''
 
 up :: ForestZipper a -> Maybe (ForestZipper a)
-up (ForestZipper lz) = ForestZipper <$> y
-  where
-    x = TZ.up (extract lz)
-    y = sequence $ extend (const x) lz
+up (ForestZipper lz) = ForestZipper <$> flip LZ.setFocus lz <$> TZ.up (extract lz)
 
 backward :: ForestZipper a -> Maybe (ForestZipper a)
 backward (ForestZipper lz) = ForestZipper <$> LZ.backward lz
