@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use ++" #-}
 module Blog.Utils.Menu.Tests
   ( tests,
   )
@@ -11,12 +14,12 @@ import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.RoseTree as R
 import qualified Blog.Utils.TreeZipper as TZ
 import Control.Monad.Writer
+import Data.Functor
 import Polysemy
 import Polysemy.State
 import Test.Tasty
 import Test.Tasty.HUnit
 import TestSuite.Util
-import Text.Blaze.Html.Renderer.String
 
 tests :: TestTree
 tests =
@@ -24,44 +27,83 @@ tests =
     concat
       [ fromAssertions
           "makeMenu"
-          [ forestZipper @=? (Menu.toForestZipper <$> (Menu.makeMenu project))
+          [ forestZipper @=? (Menu.makeMenu project <&> Menu.toForestZipper)
           ],
         fromAssertions
           "showMenu"
-          [ Just [[Link.link "cv/" "cv/", Link.link "index.md" "index.md", Link.link "posts/" "posts/", Link.link "projects/" "projects/"]]
-              @=? ( run
-                      . execState @[[Link.Link]] []
-                      . evalState @[Link.Link] []
-                      . toListList
-                      . Menu.showMenu'
-                      <$> (Menu.makeMenu project)
+          [ Just
+              [ [ Link.link "cv/" "cv/",
+                  Link.link "index.md" "index.md",
+                  Link.link "posts/" "posts/",
+                  Link.link "projects/" "projects/"
+                ]
+              ]
+              @=? ( ( Menu.makeMenu project
+                        <&> run
+                          . execState @[[Link.Link]] []
+                          . evalState @[Link.Link] []
+                          . toListList
+                          . Menu.showMenu'
+                    )
                   ),
-            Just [[Link.link "cv/" "cv/", Link.link "index.md" "index.md", Link.link "posts/" "posts/", Link.link "projects/" "projects/"], [Link.link "index.md" "cv/index.md"]]
-              @=? ( run
-                      . execState @[[Link.Link]] []
-                      . evalState @[Link.Link] []
-                      . toListList
-                      . Menu.showMenu'
-                      <$> (Menu.down "index.md" =<< (Menu.makeMenu project))
+            Just
+              [ [ Link.link "cv/" "cv/",
+                  Link.link "index.md" "index.md",
+                  Link.link "posts/" "posts/",
+                  Link.link "projects/" "projects/"
+                ],
+                [Link.link "index.md" "cv/index.md"]
+              ]
+              @=? ( Menu.makeMenu project
+                      >>= Menu.down "index.md"
+                      <&> run
+                        . execState @[[Link.Link]] []
+                        . evalState @[Link.Link] []
+                        . toListList
+                        . Menu.showMenu'
+                  ),
+            Just
+              [ [ Link.link "cv/" "cv/",
+                  Link.link "index.md" "index.md",
+                  Link.link "posts/" "posts/",
+                  Link.link "projects/" "projects/"
+                ],
+                [ Link.link "applicative/" "posts/applicative/",
+                  Link.link "index.md" "posts/index.md",
+                  Link.link "tests/" "posts/tests/"
+                ],
+                [Link.link "index.md" "posts/applicative/index.md"]
+              ]
+              @=? ( Menu.makeMenu project
+                      >>= Menu.forward
+                      >>= Menu.forward
+                      >>= Menu.down "applicative/"
+                      >>= Menu.down "index.md"
+                      <&> run
+                        . execState @[[Link.Link]] []
+                        . evalState @[Link.Link] []
+                        . toListList
+                        . Menu.showMenu'
+                  ),
+            Just
+              [ [ Link.link "cv/" "cv/",
+                  Link.link "index.md" "index.md",
+                  Link.link "posts/" "posts/",
+                  Link.link "projects/" "projects/"
+                ],
+                [ Link.link "applicative/" "posts/applicative/",
+                  Link.link "index.md" "posts/index.md",
+                  Link.link "tests/" "posts/tests/"
+                ]
+              ]
+              @=? ( Menu.makeMenu project
+                      >>= Menu.moveTo "posts/applicative/"
+                      <&> run
+                        . execState @[[Link.Link]] []
+                        . evalState @[Link.Link] []
+                        . toListList
+                        . Menu.showMenu'
                   )
-                  {-
-                    Just [["cv/", "index.md", "posts/", "projects/"], ["applicative/", "index.md", "tests/"], ["index.md"]]
-                      @=? ( run
-                              . execState @[[(String, String)]] []
-                              . evalState @[(String, String)] []
-                              . toListList
-                              . Menu.showMenu'
-                              <$> (Menu.down "index.md" =<< Menu.down "applicative/" =<< Menu.forward =<< Menu.forward =<< (Menu.makeMenu project))
-                          ),
-                    Just [["cv/", "index.md", "posts/", "projects/"], ["applicative/", "index.md", "tests/"]]
-                      @=? ( run
-                              . execState @[[(String, String)]] []
-                              . evalState @[(String, String)] []
-                              . toListList
-                              . Menu.showMenu'
-                              <$> ((Menu.moveTo "posts/applicative/") =<< (Menu.makeMenu project))
-                          )
-                  -}
           ]
       ]
   where

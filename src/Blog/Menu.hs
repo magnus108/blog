@@ -1,14 +1,14 @@
 module Blog.Menu
   ( Menu,
     menu,
-    down,
-    moveTo,
-    showMenu,
-    forward,
-    showMenu',
-    makeMenu,
     toForestZipper,
+    down,
     downTo,
+    forward,
+    moveTo,
+    makeMenu,
+    showMenu',
+    showMenu,
   )
 where
 
@@ -17,7 +17,6 @@ import qualified Blog.Table as T
 import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
-import qualified Blog.Utils.RoseTree as R
 import qualified Blog.Utils.TreeZipper as TZ
 import qualified Blog.Utils.Trie as Tr
 import Data.Function
@@ -27,29 +26,29 @@ import Polysemy.State
 import System.FilePath (splitPath)
 import qualified Text.Blaze.Html5 as H
 
-data Menu = Menu (FZ.ForestZipper FilePath)
+newtype Menu = Menu (FZ.ForestZipper FilePath)
   deriving stock (Show)
 
 menu :: FZ.ForestZipper FilePath -> Menu
 menu = Menu
 
+toForestZipper :: Menu -> FZ.ForestZipper FilePath
+toForestZipper (Menu tz) = tz
+
 down :: FilePath -> Menu -> Maybe Menu
 down x = fmap menu . FZ.down x . toForestZipper
 
-forward :: Menu -> Maybe Menu
-forward = fmap menu . FZ.forward . toForestZipper
-
 downTo :: FilePath -> Menu -> Maybe Menu
 downTo x = fmap Menu . FZ.downTo (splitPath x) . toForestZipper
+
+forward :: Menu -> Maybe Menu
+forward = fmap menu . FZ.forward . toForestZipper
 
 moveTo :: FilePath -> Menu -> Maybe Menu
 moveTo x = fmap Menu . FZ.moveTo (splitPath x) . toForestZipper
 
 makeMenu :: [FilePath] -> Maybe Menu
 makeMenu = fmap menu . FZ.fromForest . F.fromTrie . Tr.trie . fmap splitPath
-
-toForestZipper :: Menu -> FZ.ForestZipper FilePath
-toForestZipper (Menu tz) = tz
 
 showMenu' :: (Member T.Table r) => Menu -> Sem r ()
 showMenu' m = do
