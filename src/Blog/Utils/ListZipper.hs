@@ -26,13 +26,13 @@ data ListZipper' w a = ListZipper' [a] (w a) [a]
 
 type ListZipper a = ListZipper' Identity a
 
-instance (Monad w, Comonad w) => Comonad (ListZipper' w) where
+instance (Comonad w) => Comonad (ListZipper' w) where
   extract (ListZipper' _ a _) = extract a
   duplicate l@(ListZipper' ls a rs) =
     ListZipper'
-      (shift (backward' extract return))
+      (shift backward'')
       (extend (\x -> ListZipper' ls x rs) a)
-      (shift (forward' extract return))
+      (shift forward'')
     where
       shift move = NE.tail $ iterate move l
       iterate f x = case f x of
@@ -71,12 +71,20 @@ backward' :: (w a -> a) -> (a -> w a) -> ListZipper' w a -> Maybe (ListZipper' w
 backward' d u (ListZipper' (l : ls) a rs) = Just (listZipper ls (u l) (d a : rs))
 backward' d u (ListZipper' [] _ _) = Nothing
 
+backward'' :: Comonad w => ListZipper' w a -> Maybe (ListZipper' w a)
+backward'' (ListZipper' (l : ls) a rs) = Just (listZipper ls (extend (const l) a) (extract a : rs))
+backward'' (ListZipper' [] _ _) = Nothing
+
 backward :: ListZipper a -> Maybe (ListZipper a)
 backward = backward' runIdentity Identity
 
 forward' :: (w a -> a) -> (a -> w a) -> ListZipper' w a -> Maybe (ListZipper' w a)
 forward' d u (ListZipper' ls a (r : rs)) = Just (listZipper (d a : ls) (u r) rs)
 forward' d u (ListZipper' _ _ []) = Nothing
+
+forward'' :: Comonad w => ListZipper' w a -> Maybe (ListZipper' w a)
+forward'' (ListZipper' ls a (r : rs)) = Just (listZipper (extract a : ls) (extend (const r) a) rs)
+forward'' (ListZipper' _ _ []) = Nothing
 
 forward :: ListZipper a -> Maybe (ListZipper a)
 forward = forward' runIdentity Identity
