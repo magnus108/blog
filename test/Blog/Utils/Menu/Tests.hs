@@ -32,10 +32,10 @@ tests =
         fromAssertions
           "showMenu"
           [ Just
-              [ [ Link.link "cv/" "cv/",
-                  Link.link "index.md" "index.md",
-                  Link.link "posts/" "posts/",
-                  Link.link "projects/" "projects/"
+              [ [ Link.link "cv/" "/cv/",
+                  Link.link "index.md" "/index.md",
+                  Link.link "posts/" "/posts/",
+                  Link.link "projects/" "/projects/"
                 ]
               ]
               @=? ( ( Menu.makeMenu project
@@ -47,12 +47,12 @@ tests =
                     )
                   ),
             Just
-              [ [ Link.link "cv/" "cv/",
-                  Link.link "index.md" "index.md",
-                  Link.link "posts/" "posts/",
-                  Link.link "projects/" "projects/"
+              [ [ Link.link "cv/" "/cv/",
+                  Link.link "index.md" "/index.md",
+                  Link.link "posts/" "/posts/",
+                  Link.link "projects/" "/projects/"
                 ],
-                [Link.link "index.md" "cv/index.md"]
+                [Link.link "index.md" "/cv/index.md"]
               ]
               @=? ( Menu.makeMenu project
                       >>= Menu.down "index.md"
@@ -63,16 +63,16 @@ tests =
                         . Menu.showMenu'
                   ),
             Just
-              [ [ Link.link "cv/" "cv/",
-                  Link.link "index.md" "index.md",
-                  Link.link "posts/" "posts/",
-                  Link.link "projects/" "projects/"
+              [ [ Link.link "cv/" "/cv/",
+                  Link.link "index.md" "/index.md",
+                  Link.link "posts/" "/posts/",
+                  Link.link "projects/" "/projects/"
                 ],
-                [ Link.link "applicative/" "posts/applicative/",
-                  Link.link "index.md" "posts/index.md",
-                  Link.link "tests/" "posts/tests/"
+                [ Link.link "applicative/" "/posts/applicative/",
+                  Link.link "index.md" "/posts/index.md",
+                  Link.link "tests/" "/posts/tests/"
                 ],
-                [Link.link "index.md" "posts/applicative/index.md"]
+                [Link.link "index.md" "/posts/applicative/index.md"]
               ]
               @=? ( Menu.makeMenu project
                       >>= Menu.forward
@@ -86,14 +86,14 @@ tests =
                         . Menu.showMenu'
                   ),
             Just
-              [ [ Link.link "cv/" "cv/",
-                  Link.link "index.md" "index.md",
-                  Link.link "posts/" "posts/",
-                  Link.link "projects/" "projects/"
+              [ [ Link.link "cv/" "/cv/",
+                  Link.link "index.md" "/index.md",
+                  Link.link "posts/" "/posts/",
+                  Link.link "projects/" "/projects/"
                 ],
-                [ Link.link "applicative/" "posts/applicative/",
-                  Link.link "index.md" "posts/index.md",
-                  Link.link "tests/" "posts/tests/"
+                [ Link.link "applicative/" "/posts/applicative/",
+                  Link.link "index.md" "/posts/index.md",
+                  Link.link "tests/" "/posts/tests/"
                 ]
               ]
               @=? ( Menu.makeMenu project

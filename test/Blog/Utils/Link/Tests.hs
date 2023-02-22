@@ -18,11 +18,11 @@ tests =
     concat
       [ fromAssertions
           "linkFromTreeZipper"
-          [ Link.link "projects/" "projects/"
+          [ Link.link "projects/" "/projects/"
               @=? ( treeZipper
                       & Link.fromTreeZipper
                   ),
-            Just (Link.link "chair/" "projects/chair/")
+            Just (Link.link "chair/" "/projects/chair/")
               @=? ( treeZipper
                       & TZ.down "chair/"
                       <&> Link.fromTreeZipper

@@ -20,4 +20,4 @@ link :: String -> String -> Link
 link = Link
 
 fromTreeZipper :: TZ.TreeZipper FilePath -> Link
-fromTreeZipper tz = Link (TZ.datum tz) ("/" ++ (mconcat $ TZ.datum <$> TZ.parents tz))
+fromTreeZipper tz = Link (TZ.datum tz) ("/" ++ (mconcat (TZ.datum <$> TZ.parents tz)))
