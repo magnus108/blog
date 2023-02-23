@@ -27,10 +27,10 @@ data Table m a where
 
 makeSem ''Table
 
-table :: (Member Table r) => [LZ.ListZipper (Link.Link)] -> Sem r ()
+table :: (Member Table r) => [Link.Row (Link.Link)] -> Sem r ()
 table rows = tab $ forM_ rows $ \rowData -> do
   row $ do
-    forM_ rowData $ col . link
+    forM_ (Link.unRow rowData) $ col . link
 
 toHtml :: (Member (Embed MarkupM) r, Member (State [Link.Link]) r, Member (State [[Link.Link]]) r) => Sem (Table ': r) a -> Sem r a
 toHtml =
