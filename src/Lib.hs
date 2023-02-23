@@ -80,10 +80,11 @@ getMenu = do
     Just r -> do
       items <- H.loadAll $ H.fromVersion $ Just "menu" :: (H.Compiler [H.Item String])
       let menu = M.makeMenu (fmap H.itemBody items)
-      let m =
-            (M.showMenu r menu)
+      return $
+        renderHtml $
+          ( M.showMenu r menu
               & T.toHtml
               & evalState @[Link.Link] []
               & evalState @[[Link.Link]] []
               & runM
-      return (fromMaybe "" (renderHtml <$> m))
+          )

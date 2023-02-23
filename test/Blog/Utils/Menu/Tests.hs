@@ -5,13 +5,11 @@ where
 
 import qualified Blog.Link as Link
 import qualified Blog.Menu as Menu
-import qualified Blog.Menu2 as Menu2
 import Blog.Table
 import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.RoseTree as R
-import qualified Blog.Utils.TreeZipper as TZ
-import Control.Monad.Writer
+import Data.Function
 import Data.Functor
 import Polysemy
 import Polysemy.State
@@ -22,33 +20,25 @@ import TestSuite.Util
 tests :: TestTree
 tests =
   testGroup "Blog.Utils.Menu.Tests" $
-    concat
-      [ fromAssertions
-          "makeMenu"
-          [ forestZipper @=? (Menu.makeMenu project <&> Menu.toForestZipper)
+    fromAssertions
+      "showMenu"
+      [ [ [ Link.link "cv/" "/cv/",
+            Link.link "index.md" "/index.md",
+            Link.link "posts/" "/posts/",
+            Link.link "projects/" "/projects/"
           ],
-        fromAssertions
-          "showMenu"
-          [ Just
-              [ [ Link.link "cv/" "/cv/",
-                  Link.link "index.md" "/index.md",
-                  Link.link "posts/" "/posts/",
-                  Link.link "projects/" "/projects/"
-                ],
-                [ Link.link "applicative/" "/posts/applicative/",
-                  Link.link "index.md" "/posts/index.md",
-                  Link.link "tests/" "/posts/tests/"
-                ]
-              ]
-              @=? ( Menu.makeMenu project
-                      >>= Menu.moveTo "posts/applicative/"
-                      <&> run
-                        . execState @[[Link.Link]] []
-                        . evalState @[Link.Link] []
-                        . toListList
-                        . Menu.showMenu
-                  )
+          [ Link.link "applicative/" "/posts/applicative/",
+            Link.link "index.md" "/posts/index.md",
+            Link.link "tests/" "/posts/tests/"
           ]
+        ]
+          @=? ( Menu.makeMenu project
+                  & run
+                    . execState @[[Link.Link]] []
+                    . evalState @[Link.Link] []
+                    . toListList
+                    . Menu.showMenu "posts/applicative/"
+              )
       ]
   where
     project =
