@@ -1,13 +1,7 @@
 module Blog.Menu
   ( Menu,
     menu,
-    toForestZipper,
-    down,
-    downTo,
-    forward,
-    moveTo,
     makeMenu,
-    showMenu',
     showMenu,
   )
 where
@@ -17,49 +11,24 @@ import qualified Blog.Table as T
 import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
 import qualified Blog.Utils.ListZipper as LZ
-import qualified Blog.Utils.TreeZipper as TZ
 import qualified Blog.Utils.Trie as Tr
-import Data.Function
 import Data.Maybe
 import Polysemy
-import Polysemy.State
 import System.FilePath (splitPath)
-import qualified Text.Blaze.Html5 as H
 
-newtype Menu = Menu (FZ.ForestZipper FilePath)
-  deriving stock (Show)
+newtype Menu a = Menu (a -> Maybe (FZ.ForestZipper FilePath))
 
-menu :: FZ.ForestZipper FilePath -> Menu
+menu :: (a -> Maybe (FZ.ForestZipper FilePath)) -> Menu a
 menu = Menu
 
-toForestZipper :: Menu -> FZ.ForestZipper FilePath
-toForestZipper (Menu tz) = tz
+makeMenu :: [FilePath] -> Menu FilePath
+makeMenu xs = menu (\x -> FZ.moveTo (splitPath x) =<< fz)
+  where
+    fz = FZ.fromForest $ F.fromTrie $ Tr.trie $ fmap splitPath xs
 
-down :: FilePath -> Menu -> Maybe Menu
-down x = fmap menu . FZ.down x . toForestZipper
-
-downTo :: FilePath -> Menu -> Maybe Menu
-downTo x = fmap Menu . FZ.downTo (splitPath x) . toForestZipper
-
-forward :: Menu -> Maybe Menu
-forward = fmap menu . FZ.forward . toForestZipper
-
-moveTo :: FilePath -> Menu -> Maybe Menu
-moveTo x = fmap Menu . FZ.moveTo (splitPath x) . toForestZipper
-
-makeMenu :: [FilePath] -> Maybe Menu
-makeMenu = fmap menu . FZ.fromForest . F.fromTrie . Tr.trie . fmap splitPath
-
-showMenu' :: (Member T.Table r) => Menu -> Sem r ()
-showMenu' m = do
-  let xs = FZ.ancestors $ toForestZipper m
-  let tableData = mapMaybe LZ.fromList xs :: [LZ.ListZipper (TZ.TreeZipper FilePath)]
-  T.table (fmap Link.fromTreeZipper <$> tableData)
-
-showMenu :: Menu -> H.Html
-showMenu m =
-  showMenu' m
-    & T.toHtml
-    & evalState @[Link.Link] []
-    & evalState @[[Link.Link]] []
-    & runM
+showMenu :: (Member T.Table r) => FilePath -> Menu FilePath -> Sem r ()
+showMenu x (Menu f) = do
+  let fz = f x
+  let xs = FZ.ancestors <$> fz
+  let tableData = mapMaybe LZ.fromList <$> xs
+  T.table (fmap Link.fromTreeZipper <$> (fromMaybe [] tableData))

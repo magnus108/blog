@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-{-# HLINT ignore "Use ++" #-}
 module Blog.Utils.Menu.Tests
   ( tests,
   )
@@ -8,6 +5,7 @@ where
 
 import qualified Blog.Link as Link
 import qualified Blog.Menu as Menu
+import qualified Blog.Menu2 as Menu2
 import Blog.Table
 import qualified Blog.Utils.Forest as F
 import qualified Blog.Utils.ForestZipper as FZ
@@ -36,60 +34,6 @@ tests =
                   Link.link "index.md" "/index.md",
                   Link.link "posts/" "/posts/",
                   Link.link "projects/" "/projects/"
-                ]
-              ]
-              @=? ( ( Menu.makeMenu project
-                        <&> run
-                          . execState @[[Link.Link]] []
-                          . evalState @[Link.Link] []
-                          . toListList
-                          . Menu.showMenu'
-                    )
-                  ),
-            Just
-              [ [ Link.link "cv/" "/cv/",
-                  Link.link "index.md" "/index.md",
-                  Link.link "posts/" "/posts/",
-                  Link.link "projects/" "/projects/"
-                ],
-                [Link.link "index.md" "/cv/index.md"]
-              ]
-              @=? ( Menu.makeMenu project
-                      >>= Menu.down "index.md"
-                      <&> run
-                        . execState @[[Link.Link]] []
-                        . evalState @[Link.Link] []
-                        . toListList
-                        . Menu.showMenu'
-                  ),
-            Just
-              [ [ Link.link "cv/" "/cv/",
-                  Link.link "index.md" "/index.md",
-                  Link.link "posts/" "/posts/",
-                  Link.link "projects/" "/projects/"
-                ],
-                [ Link.link "applicative/" "/posts/applicative/",
-                  Link.link "index.md" "/posts/index.md",
-                  Link.link "tests/" "/posts/tests/"
-                ],
-                [Link.link "index.md" "/posts/applicative/index.md"]
-              ]
-              @=? ( Menu.makeMenu project
-                      >>= Menu.forward
-                      >>= Menu.forward
-                      >>= Menu.down "applicative/"
-                      >>= Menu.down "index.md"
-                      <&> run
-                        . execState @[[Link.Link]] []
-                        . evalState @[Link.Link] []
-                        . toListList
-                        . Menu.showMenu'
-                  ),
-            Just
-              [ [ Link.link "cv/" "/cv/",
-                  Link.link "index.md" "/index.md",
-                  Link.link "posts/" "/posts/",
-                  Link.link "projects/" "/projects/"
                 ],
                 [ Link.link "applicative/" "/posts/applicative/",
                   Link.link "index.md" "/posts/index.md",
@@ -102,7 +46,7 @@ tests =
                         . execState @[[Link.Link]] []
                         . evalState @[Link.Link] []
                         . toListList
-                        . Menu.showMenu'
+                        . Menu.showMenu
                   )
           ]
       ]

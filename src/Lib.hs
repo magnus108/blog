@@ -3,14 +3,16 @@ module Lib
   )
 where
 
+import qualified Blog.Link as Link
 import qualified Blog.Menu as M
+import qualified Blog.Table as T
 import Data.Foldable
 import Data.Function
+import Data.Functor
 import Data.Maybe
-import Data.Traversable
 import qualified Hakyll as H
 import Polysemy
-import System.FilePath.Posix (normalise)
+import Polysemy.State
 import Text.Blaze.Html.Renderer.Pretty
 
 data Site m a where
@@ -78,4 +80,10 @@ getMenu = do
     Just r -> do
       items <- H.loadAll $ H.fromVersion $ Just "menu" :: (H.Compiler [H.Item String])
       let menu = M.makeMenu (fmap H.itemBody items)
-      return (fromMaybe "" (renderHtml . M.showMenu <$> (M.moveTo r =<< menu)))
+      let m =
+            (M.showMenu r menu)
+              & T.toHtml
+              & evalState @[Link.Link] []
+              & evalState @[[Link.Link]] []
+              & runM
+      return (fromMaybe "" (renderHtml <$> m))
