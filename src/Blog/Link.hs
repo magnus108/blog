@@ -7,6 +7,7 @@ module Blog.Link
     Row,
     row,
     unRow,
+    cx,
   )
 where
 
@@ -26,10 +27,12 @@ link = Link
 fromTreeZipper :: TZ.TreeZipper FilePath -> Link
 fromTreeZipper tz = Link (TZ.datum tz) ("/" ++ (mconcat (TZ.datum <$> TZ.parents tz)))
 
-data Row a = Row (LZ.ListZipper a)
+data Row a = Row
+  { cx :: [String],
+    unRow :: a
+  }
+  deriving stock (Show)
+  deriving stock (Eq)
 
-row :: LZ.ListZipper a -> Row a
+row :: [String] -> a -> Row a
 row = Row
-
-unRow :: Row a -> LZ.ListZipper a
-unRow (Row x) = x

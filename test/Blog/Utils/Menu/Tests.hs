@@ -22,19 +22,23 @@ tests =
   testGroup "Blog.Utils.Menu.Tests" $
     fromAssertions
       "showMenu"
-      [ [ [ Link.link "cv/" "/cv/",
-            Link.link "index.md" "/index.md",
-            Link.link "posts/" "/posts/",
-            Link.link "projects/" "/projects/"
-          ],
-          [ Link.link "applicative/" "/posts/applicative/",
-            Link.link "index.md" "/posts/index.md",
-            Link.link "tests/" "/posts/tests/"
-          ]
+      [ [ Link.row
+            []
+            [ Link.link "cv/" "/cv/",
+              Link.link "index.md" "/index.md",
+              Link.link "posts/" "/posts/",
+              Link.link "projects/" "/projects/"
+            ],
+          Link.row
+            []
+            [ Link.link "applicative/" "/posts/applicative/",
+              Link.link "index.md" "/posts/index.md",
+              Link.link "tests/" "/posts/tests/"
+            ]
         ]
           @=? ( Menu.makeMenu project
                   & run
-                    . execState @[[Link.Link]] []
+                    . execState @[Link.Row [Link.Link]] []
                     . evalState @[Link.Link] []
                     . toListList
                     . Menu.showMenu "posts/applicative/"

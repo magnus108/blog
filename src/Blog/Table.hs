@@ -22,14 +22,14 @@ import Text.Blaze.Internal
 data Table m a where
   Link :: Link.Link -> Table m ()
   Col :: m () -> Table m ()
-  Row :: m () -> Table m ()
+  Row :: [String] -> m () -> Table m ()
   Tab :: m () -> Table m ()
 
 makeSem ''Table
 
-table :: (Member Table r) => [Link.Row (Link.Link)] -> Sem r ()
+table :: (Member Table r) => [Link.Row (LZ.ListZipper Link.Link)] -> Sem r ()
 table rows = tab $ forM_ rows $ \rowData -> do
-  row $ do
+  row (Link.cx rowData) $ do
     forM_ (Link.unRow rowData) $ col . link
 
 toHtml :: (Member (Embed MarkupM) r, Member (State [Link.Link]) r, Member (State [[Link.Link]]) r) => Sem (Table ': r) a -> Sem r a
@@ -43,7 +43,7 @@ toHtml =
           mm <- runT m
           z <- raise $ toHtml mm
           pureT ()
-        Row m -> do
+        Row cs m -> do
           mm <- runT m
           z <- raise $ toHtml mm
           row <- get @[Link.Link]
@@ -61,7 +61,7 @@ toHtml =
           pureT ()
     )
 
-toListList :: (Member (State [Link.Link]) r, Member (State [[Link.Link]]) r) => Sem (Table ': r) a -> Sem r a
+toListList :: (Member (State [Link.Link]) r, Member (State [Link.Row [Link.Link]]) r) => Sem (Table ': r) a -> Sem r a
 toListList =
   interpretH
     ( \case
@@ -72,11 +72,11 @@ toListList =
           mm <- runT m
           z <- raise $ toListList mm
           pureT ()
-        Row m -> do
+        Row cs m -> do
           mm <- runT m
           z <- raise $ toListList mm
           row <- get @[Link.Link]
-          modify @[[Link.Link]] (++ [row])
+          modify @[Link.Row [Link.Link]] (++ [Link.row cs row])
           put @[Link.Link] []
           pureT ()
         Tab m -> do

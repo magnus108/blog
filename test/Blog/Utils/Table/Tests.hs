@@ -18,23 +18,29 @@ tests =
     concat
       [ fromAssertions
           "table"
-          [ [ [ Link.link "a0" "l0",
-                Link.link "b0" "l0",
-                Link.link "c0" "l0"
-              ],
-              [ Link.link "a1" "l1",
-                Link.link "b1" "l1",
-                Link.link "c1" "l1"
-              ],
-              [ Link.link "a2" "l2",
-                Link.link "b2" "l2",
-                Link.link "c2" "l2"
-              ]
+          [ [ Link.row
+                ["gg"]
+                [ Link.link "a0" "l0",
+                  Link.link "b0" "l0",
+                  Link.link "c0" "l0"
+                ],
+              Link.row
+                []
+                [ Link.link "a1" "l1",
+                  Link.link "b1" "l1",
+                  Link.link "c1" "l1"
+                ],
+              Link.row
+                []
+                [ Link.link "a2" "l2",
+                  Link.link "b2" "l2",
+                  Link.link "c2" "l2"
+                ]
             ]
               @=? ( example
                       & toListList
                       & evalState @[Link.Link] []
-                      & execState @[[Link.Link]] []
+                      & execState @[Link.Row [Link.Link]] []
                       & run
                   )
           ]
@@ -42,15 +48,15 @@ tests =
   where
     example = do
       tab $ do
-        row $ do
+        row ["gg"] $ do
           col $ link (Link.link "a0" "l0")
           col $ link (Link.link "b0" "l0")
           col $ link (Link.link "c0" "l0")
-        row $ do
+        row [] $ do
           col $ link (Link.link "a1" "l1")
           col $ link (Link.link "b1" "l1")
           col $ link (Link.link "c1" "l1")
-        row $ do
+        row [] $ do
           col $ link (Link.link "a2" "l2")
           col $ link (Link.link "b2" "l2")
           col $ link (Link.link "c2" "l2")

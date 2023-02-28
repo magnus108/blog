@@ -35,5 +35,5 @@ showMenu x (Menu f) = do
   let xs = FZ.ancestors <$> fz
   let tableData = mapMaybe LZ.fromList <$> xs
   let gg = (fmap Link.fromTreeZipper <$> (fromMaybe [] tableData))
-  let gg2 = fmap Link.row gg
+  let gg2 = fmap (Link.row []) gg
   T.table gg2
