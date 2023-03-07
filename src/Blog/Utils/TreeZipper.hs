@@ -1,6 +1,8 @@
 module Blog.Utils.TreeZipper
   ( Context,
+    Context' (..),
     TreeZipper,
+    context,
     fromRoseTree,
     toRoseTree,
     datum,
@@ -17,11 +19,48 @@ module Blog.Utils.TreeZipper
 where
 
 import qualified Blog.Utils.RoseTree as RT
+import Control.Comonad
+import qualified Data.List.NonEmpty as NE
+import Data.Maybe (listToMaybe)
 
-data Context a = Context [RT.RoseTree a] a [RT.RoseTree a]
-  deriving stock (Show)
+data Context' w a = Context' [w a] a [w a]
   deriving stock (Eq)
+  deriving stock (Show)
   deriving stock (Ord)
+  deriving stock (Functor)
+  deriving stock (Foldable)
+  deriving stock (Traversable)
+
+instance (Comonad w) => Comonad (Context' w) where
+  extract (Context' _ a _) = a
+  duplicate l@(Context' ls a rs) =
+    Context'
+      (shift backward'')
+      l
+      (shift forward'')
+    where
+      lol = (\x -> extend (const l) x) <$> listToMaybe (ls ++ rs)
+      shift move = case lol of
+        Nothing -> []
+        Just x -> NE.tail $ iterate move x
+      iterate f x = case f x of
+        Just x' -> NE.cons x (iterate f x')
+        Nothing -> NE.singleton x
+
+context :: [w a] -> a -> [w a] -> Context' w a
+context ls x rs = Context' ls x rs
+
+backward'' :: Comonad w => w (Context' w a) -> Maybe (w (Context' w a))
+backward'' x = case extract x of
+  (Context' (l : ls) a rs) -> Just (extend (\l' -> context ls (extract l') (extend (const a) l' : rs)) l)
+  (Context' [] _ _) -> Nothing
+
+forward'' :: Comonad w => w (Context' w a) -> Maybe (w (Context' w a))
+forward'' x = case extract x of
+  (Context' ls a (r : rs)) -> Just (extend (\r' -> context (extend (const a) r' : ls) (extract r') rs) r)
+  (Context' _ _ []) -> Nothing
+
+type Context a = Context' RT.RoseTree a
 
 data TreeZipper a = TreeZipper (RT.RoseTree a) [Context a]
   deriving stock (Show)
@@ -42,12 +81,12 @@ down x (TreeZipper rt bs) =
   let (ls, rs) = break (\item -> RT.datum item == x) (RT.children rt)
    in case rs of
         y : ys ->
-          Just (TreeZipper y (Context ls (RT.datum rt) ys : bs))
+          Just (TreeZipper y (Context' ls (RT.datum rt) ys : bs))
         _ -> Nothing
 
 up :: TreeZipper a -> Maybe (TreeZipper a)
 up (TreeZipper item []) = Nothing
-up (TreeZipper item ((Context ls x rs) : bs)) =
+up (TreeZipper item ((Context' ls x rs) : bs)) =
   Just (TreeZipper (RT.roseTree x (ls <> [item] <> rs)) bs)
 
 parents :: TreeZipper a -> [TreeZipper a]
@@ -59,11 +98,11 @@ parents tz = parent ++ [tz]
 
 rights' :: TreeZipper a -> [RT.RoseTree a]
 rights' (TreeZipper _ []) = []
-rights' (TreeZipper item ((Context ls x rs) : bs)) = rs
+rights' (TreeZipper item ((Context' ls x rs) : bs)) = rs
 
 lefts' :: TreeZipper a -> [RT.RoseTree a]
 lefts' (TreeZipper _ []) = []
-lefts' (TreeZipper item ((Context ls x rs) : bs)) = reverse ls
+lefts' (TreeZipper item ((Context' ls x rs) : bs)) = reverse ls
 
 firstChild :: Eq a => TreeZipper a -> Maybe (TreeZipper a)
 firstChild tz = firstChild' (toRoseTree tz)

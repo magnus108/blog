@@ -7,9 +7,15 @@ module Blog.Utils.RoseTree
   )
 where
 
+import Control.Comonad
+
 data RoseTree a = RoseTree a [RoseTree a]
   deriving (Eq, Ord, Show)
   deriving (Functor)
+
+instance Comonad RoseTree where
+  duplicate w@(RoseTree _ as) = RoseTree w (map duplicate as)
+  extract (RoseTree a _) = a
 
 roseTree :: a -> [RoseTree a] -> RoseTree a
 roseTree = RoseTree

@@ -14,9 +14,9 @@
                         shell.tools = {
                             cabal = "latest";
                             stack = "2.9.1";
-                            haskell-language-server = "latest";
-                            hlint = "latest";
-                            ormolu = "latest";
+#                            haskell-language-server = "latest";
+#                            hlint = "latest";
+#                            ormolu = "latest";
                         };
                     };
                 })
